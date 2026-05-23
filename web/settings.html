@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>设置 - AI KOL 达人匹配助手</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="layout">
+        <nav class="sidebar">
+            <div class="logo">
+                <span class="logo-icon">KOL</span>
+                <span class="logo-text">达人匹配</span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="index.html">首页推荐</a></li>
+                <li class="nav-item"><a href="explore.html">达人库</a></li>
+                <li class="nav-item"><a href="history.html">历史记录</a></li>
+                <li class="nav-item active"><a href="settings.html">设置</a></li>
+            </ul>
+        </nav>
+
+        <main class="main-content">
+            <header class="topbar">
+                <h1>设置</h1>
+                <p>配置系统参数和 API 连接</p>
+            </header>
+
+            <div style="padding: 24px 32px; max-width: 800px;">
+                <div class="card" style="margin-bottom: 24px;">
+                    <h2>LLM 配置</h2>
+                    <div class="form-group">
+                        <label class="form-label">DeepSeek API Key</label>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="password" id="apiKey" value="sk-****" style="flex: 1;">
+                            <button class="btn-secondary" onclick="toggleKeyVisibility()">👁</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">模型选择</label>
+                        <select id="modelSelect">
+                            <option value="deepseek-chat" selected>deepseek-chat</option>
+                            <option value="deepseek-reasoner">deepseek-reasoner</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Base URL</label>
+                        <input type="text" id="baseUrl" value="https://api.deepseek.com/v1">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">超时时间（秒）</label>
+                        <input type="number" id="timeout" value="60" min="10" max="300">
+                    </div>
+                    <div style="display: flex; gap: 12px;">
+                        <button class="btn-primary" style="width: auto; padding: 10px 24px;" onclick="testConnection()">测试连接</button>
+                        <button class="btn-secondary" onclick="saveSettings()">保存设置</button>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-bottom: 24px;">
+                    <h2>数据配置</h2>
+                    <div class="form-group">
+                        <label class="form-label">达人数据文件</label>
+                        <input type="text" value="data/influencers.csv" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">数据量</label>
+                        <input type="text" value="90 位达人" disabled>
+                    </div>
+                    <button class="btn-secondary" onclick="reloadData()">重新加载数据</button>
+                </div>
+
+                <div class="card">
+                    <h2>系统信息</h2>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 0.9rem; color: #666;">
+                        <div>版本：v1.0.0</div>
+                        <div>后端：Flask + Python</div>
+                        <div>LLM：DeepSeek API</div>
+                        <div>前端：HTML + CSS + JS</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function toggleKeyVisibility() {
+            const input = document.getElementById('apiKey');
+            input.type = input.type === 'password' ? 'text' : 'password';
+        }
+
+        function testConnection() {
+            alert('正在测试 API 连接...（演示功能）');
+        }
+
+        function saveSettings() {
+            alert('设置已保存（演示：实际应写入 .env 文件）');
+        }
+
+        function reloadData() {
+            alert('数据已重新加载（演示功能）');
+        }
+    </script>
+</body>
+</html>

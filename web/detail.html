@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>达人详情 - AI KOL 达人匹配助手</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+    <div class="layout">
+        <nav class="sidebar">
+            <div class="logo">
+                <span class="logo-icon">KOL</span>
+                <span class="logo-text">达人匹配</span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="index.html">首页推荐</a></li>
+                <li class="nav-item"><a href="explore.html">达人库</a></li>
+                <li class="nav-item"><a href="history.html">历史记录</a></li>
+                <li class="nav-item"><a href="settings.html">设置</a></li>
+            </ul>
+        </nav>
+
+        <main class="main-content">
+            <header class="topbar">
+                <h1>达人详情</h1>
+                <p>深入了解达人数据画像</p>
+            </header>
+
+            <div style="padding: 24px 32px; max-width: 1000px;">
+                <div id="detailContent">
+                    <div class="empty-state" style="min-height: 300px;">
+                        <div class="empty-icon">📋</div>
+                        <h3>加载中...</h3>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const API_BASE = 'http://127.0.0.1:5000';
+
+        async function loadDetail() {
+            const params = new URLSearchParams(location.search);
+            const kolId = params.get('id');
+            const container = document.getElementById('detailContent');
+
+            if (!kolId) {
+                container.innerHTML = '<div class="empty-state" style="color: #e74c3c;"><h3>缺少达人 ID</h3></div>';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/api/kol/${kolId}`);
+                const result = await response.json();
+
+                if (!result.success) {
+                    container.innerHTML = `<div class="empty-state" style="color: #e74c3c;"><h3>加载失败</h3><p>${result.error}</p></div>`;
+                    return;
+                }
+
+                const kol = result.data;
+                const platformClass = { '小红书': 'xhs', '抖音': 'dy', 'B站': 'bz', '微博': 'wb' }[kol.platform] || '';
+                const followers = kol.followers >= 10000 ? (kol.followers / 10000).toFixed(0) + '万' : kol.followers;
+                const riskClass = kol.risk_note?.includes('广告') ? 'high' : (kol.risk_note?.includes('需') ? 'medium' : 'low');
+                const riskText = kol.risk_note?.includes('广告') ? '广告比例较高' : (kol.risk_note?.includes('需') ? '需谨慎' : '无风险');
+
+                container.innerHTML = `
+                    <div class="kol-header">
+                        <div class="kol-avatar">${kol.kol_name.charAt(0)}</div>
+                        <div class="kol-info">
+                            <h2>${kol.kol_name} <span class="platform-badge ${platformClass}">${kol.platform}</span></h2>
+                            <div class="kol-meta">ID: ${kol.kol_id} · ${kol.field}</div>
+                        </div>
+                    </div>
+
+                    <div class="kol-stats-grid">
+                        <div class="kol-stat-card">
+                            <div class="kol-stat-value">${followers}</div>
+                            <div class="kol-stat-label">粉丝数</div>
+                        </div>
+                        <div class="kol-stat-card">
+                            <div class="kol-stat-value">${kol.engagement_rate}%</div>
+                            <div class="kol-stat-label">互动率</div>
+                        </div>
+                        <div class="kol-stat-card">
+                            <div class="kol-stat-value">${kol.conversion_rate}%</div>
+                            <div class="kol-stat-label">转化率</div>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+                        <div class="card">
+                            <h4>匹配分数</h4>
+                            <div id="matchRing" style="width: 100%; height: 200px;"></div>
+                        </div>
+                        <div class="card">
+                            <h4>报价信息</h4>
+                            <div style="padding: 20px 0; text-align: center;">
+                                <div style="font-size: 2.5rem; font-weight: 700; color: #667eea;">¥${kol.price.toLocaleString()}</div>
+                                <div style="color: #999; margin-top: 8px;">合作报价</div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px;">
+                                <div style="text-align: center; padding: 12px; background: #f8f9fa; border-radius: 8px;">
+                                    <div style="font-weight: 600;">${kol.cooperation_count}次</div>
+                                    <div style="font-size: 0.8rem; color: #999;">历史合作</div>
+                                </div>
+                                <div style="text-align: center; padding: 12px; background: #f8f9fa; border-radius: 8px;">
+                                    <div style="font-weight: 600;"><span class="risk-badge ${riskClass}">${riskText}</span></div>
+                                    <div style="font-size: 0.8rem; color: #999;">风险评估</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card" style="margin-bottom: 24px;">
+                        <h4>受众画像</h4>
+                        <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;">
+                            ${kol.audience.split('、').map(tag => `<span style="padding: 6px 14px; background: #f0f4ff; color: #667eea; border-radius: 16px; font-size: 0.85rem;">${tag}</span>`).join('')}
+                        </div>
+                    </div>
+
+                    <div class="card" style="margin-bottom: 24px;">
+                        <h4>数据表现</h4>
+                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 16px;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 1.5rem; font-weight: 700;">${kol.avg_likes.toLocaleString()}</div>
+                                <div style="font-size: 0.8rem; color: #999;">平均点赞</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 1.5rem; font-weight: 700;">${kol.avg_comments.toLocaleString()}</div>
+                                <div style="font-size: 0.8rem; color: #999;">平均评论</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 1.5rem; font-weight: 700;">${kol.engagement_rate}%</div>
+                                <div style="font-size: 0.8rem; color: #999;">互动率</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 1.5rem; font-weight: 700;">${kol.conversion_rate}%</div>
+                                <div style="font-size: 0.8rem; color: #999;">转化率</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 12px;">
+                        <button class="btn-secondary" onclick="history.back()">← 返回</button>
+                        <button class="btn-primary" style="width: auto; padding: 10px 24px;" onclick="location.href='index.html'">去首页推荐</button>
+                    </div>
+                `;
+
+                // Render match score ring
+                setTimeout(() => {
+                    const chartDom = document.getElementById('matchRing');
+                    if (chartDom) {
+                        const chart = echarts.init(chartDom);
+                        chart.setOption({
+                            series: [{
+                                type: 'gauge',
+                                startAngle: 90,
+                                endAngle: -270,
+                                pointer: { show: false },
+                                progress: { show: true, overlap: false, roundCap: true, clip: false },
+                                axisLine: { lineStyle: { width: 20, color: [[1, '#e0e4ff']] } },
+                                axisTick: { show: false },
+                                splitLine: { show: false },
+                                axisLabel: { show: false },
+                                data: [{
+                                    value: 85,
+                                    name: '匹配分',
+                                    title: { offsetCenter: ['0%', '30%'], fontSize: 14, color: '#999' },
+                                    detail: { offsetCenter: ['0%', '0%'], fontSize: 36, fontWeight: 'bold', color: '#667eea', formatter: '{value}' }
+                                }],
+                                detail: { width: 50, height: 14, fontSize: 14, color: 'auto', borderColor: 'auto', borderRadius: 20, borderWidth: 1 }
+                            }]
+                        });
+                    }
+                }, 100);
+
+            } catch (e) {
+                container.innerHTML = `<div class="empty-state" style="color: #e74c3c;"><h3>加载失败</h3><p>${e.message}</p></div>`;
+            }
+        }
+
+        loadDetail();
+    </script>
+</body>
+</html>

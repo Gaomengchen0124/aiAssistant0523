@@ -1,1 +1,156 @@
-[]
+[
+  {
+    "id": "kol-001",
+    "category": "foundation",
+    "description": "搭建项目目录结构 + requirements.txt + init.sh",
+    "status": "done",
+    "steps": [
+      "创建 src/ data/ web/ 目录结构",
+      "创建 requirements.txt（pandas, requests, python-dotenv）",
+      "创建 init.sh 环境检查脚本"
+    ]
+  },
+  {
+    "id": "kol-002",
+    "category": "data_layer",
+    "description": "CSV数据加载与清洗模块",
+    "status": "done",
+    "steps": [
+      "实现 CSVLoader.load() 读取达人CSV并字段类型转换",
+      "实现 CSVLoader.validate() 检查必填字段完整性",
+      "编写独立测试脚本验证数据加载"
+    ]
+  },
+  {
+    "id": "kol-003",
+    "category": "rule_engine",
+    "description": "需求解析 + 初步筛选",
+    "status": "done",
+    "steps": [
+      "实现 DemandParser.parse() 解析用户输入为结构化需求对象",
+      "实现 CandidateFilter.filter() 按平台/领域/预算/粉丝数硬过滤",
+      "编写独立测试脚本验证筛选逻辑"
+    ]
+  },
+  {
+    "id": "kol-004",
+    "category": "rule_engine",
+    "description": "ROI预估计算模块",
+    "status": "done",
+    "steps": [
+      "实现 ROICalculator.compute() 基于历史转化率和报价计算ROI",
+      "验证 ROI 数值合理性（1:1.5 到 1:5 区间）",
+      "编写独立测试脚本"
+    ]
+  },
+  {
+    "id": "kol-005",
+    "category": "rule_engine",
+    "description": "性价比与风险评分（纯规则计算）",
+    "status": "done",
+    "steps": [
+      "实现 ValueScorer.score() 性价比公式与Min-Max归一化",
+      "实现 RiskAssessor.assess() 风险备注文本映射与扣分",
+      "编写独立测试脚本验证计算结果"
+    ]
+  },
+  {
+    "id": "kol-006",
+    "category": "llm_layer",
+    "description": "LLM客户端封装与API配置",
+    "status": "done",
+    "steps": [
+      "实现 LLMClient.__init__() 配置API密钥、模型选择、超时重试",
+      "实现 LLMClient.match_audience() 受众匹配度评估",
+      "实现 LLMClient.generate_reason() 推荐理由生成",
+      "实现 LLMClient.generate_advice() 投放建议生成",
+      "验证LLM调用连通性"
+    ]
+  },
+  {
+    "id": "kol-007",
+    "category": "scoring_aggregation",
+    "description": "受众匹配度批量计算（依赖LLM）",
+    "status": "done",
+    "steps": [
+      "实现 AudienceMatcher.match() 批量调用LLM计算匹配分",
+      "处理LLM并发与异常降级",
+      "编写测试脚本（可Mock LLM）"
+    ]
+  },
+  {
+    "id": "kol-008",
+    "category": "scoring_aggregation",
+    "description": "综合评分计算",
+    "status": "done",
+    "steps": [
+      "实现 CompositeScorer.compute() 加权总分计算",
+      "权重：匹配40% + 性价比35% + 风险25%",
+      "验证分数在0-100区间，排序符合直觉"
+    ]
+  },
+  {
+    "id": "kol-009",
+    "category": "ranking_output",
+    "description": "TOP10排序与输出格式化",
+    "status": "done",
+    "steps": [
+      "实现 Ranker.top_n() 按总分降序取前10",
+      "实现 OutputFormatter.to_markdown() 生成表格+投放建议",
+      "对照04_输出设计.md验证输出字段完整性"
+    ]
+  },
+  {
+    "id": "kol-010",
+    "category": "orchestration",
+    "description": "11步原子工作流编排器",
+    "status": "done",
+    "steps": [
+      "实现 KOLPipeline.run() 串联全部11步",
+      "添加异常处理与日志记录",
+      "实现 main.py CLI入口",
+      "实现 web/app.py Flask后端API"
+    ]
+  },
+  {
+    "id": "kol-011",
+    "category": "qa",
+    "description": "对照验收标准逐项自测 + 自动化测试脚本开发",
+    "status": "done",
+    "steps": [
+      "功能完整性：端到端流程跑通",
+      "输出格式：表格字段齐全",
+      "业务逻辑：排序合理性",
+      "Demo表现：3-5分钟完成一轮推荐",
+      "搭建 pytest 测试框架（pytest.ini + tests/ 目录结构）",
+      "编写 9 个模块的单元测试（csv_loader/filters/scoring/ranking/roi/formatters/budget_allocator/pipeline/llm_client）",
+      "编写集成测试（end_to_end + web_api），Flask test_client 覆盖全部 API 端点",
+      "编写数据质量测试（CSV 列完整性/重复/空值/数值范围/平台枚举）",
+      "176 个测试用例全部通过，整体代码覆盖率 80%"
+    ]
+  },
+  {
+    "id": "kol-012",
+    "category": "frontend",
+    "description": "前端Demo页面（表单输入 + 结果展示）",
+    "status": "todo",
+    "steps": [
+      "创建 web/index.html 需求表单页面（目标受众/内容领域/预算/平台等）",
+      "创建 web/css/style.css 页面样式",
+      "创建 web/js/app.js 表单提交与结果渲染交互",
+      "对接后端Pipeline或本地Python执行输出",
+      "Flask服务器端到端联调"
+    ]
+  },
+  {
+    "id": "kol-013",
+    "category": "api_backend",
+    "description": "补充后端API接口（需求解析 + 预算分配）",
+    "status": "done",
+    "steps": [
+      "实现 POST /api/parse_demand：自由文本需求解析（调用LLM提取性别/年龄/职业/领域/预算/平台）",
+      "实现 POST /api/allocate_budget：按合作人数或期望ROI进行预算分配",
+      "验证前端 app.js 调用连通性"
+    ]
+  }
+]

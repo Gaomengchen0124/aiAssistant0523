@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>达人库 - AI KOL 达人匹配助手</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+    <div class="layout">
+        <nav class="sidebar">
+            <div class="logo">
+                <span class="logo-icon">KOL</span>
+                <span class="logo-text">达人匹配</span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="index.html">首页推荐</a></li>
+                <li class="nav-item active"><a href="explore.html">达人库</a></li>
+                <li class="nav-item"><a href="history.html">历史记录</a></li>
+                <li class="nav-item"><a href="settings.html">设置</a></li>
+            </ul>
+        </nav>
+
+        <main class="main-content">
+            <header class="topbar">
+                <h1>达人库</h1>
+                <p>浏览全部达人，独立筛选和搜索</p>
+            </header>
+
+            <div style="padding: 24px 32px;">
+                <!-- 统计概览 -->
+                <div id="statsOverview" class="stats-row" style="margin-bottom: 24px;">
+                    <!-- JS 渲染 -->
+                </div>
+
+                <!-- 图表区 -->
+                <div class="charts-row" style="margin-bottom: 24px;">
+                    <div class="chart-card">
+                        <div id="platformChart" style="width: 100%; height: 280px;"></div>
+                    </div>
+                    <div class="chart-card">
+                        <div id="fieldChart" style="width: 100%; height: 280px;"></div>
+                    </div>
+                </div>
+
+                <!-- 筛选工具栏 -->
+                <div class="card" style="margin-bottom: 24px;">
+                    <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end;">
+                        <div class="form-field" style="flex: 1; min-width: 150px;">
+                            <label>搜索达人</label>
+                            <input type="text" id="searchName" placeholder="输入达人名称...">
+                        </div>
+                        <div class="form-field" style="min-width: 120px;">
+                            <label>平台</label>
+                            <select id="filterPlatform">
+                                <option value="">全部平台</option>
+                                <option value="小红书">小红书</option>
+                                <option value="抖音">抖音</option>
+                                <option value="B站">B站</option>
+                                <option value="微博">微博</option>
+                            </select>
+                        </div>
+                        <div class="form-field" style="min-width: 120px;">
+                            <label>内容领域</label>
+                            <select id="filterField">
+                                <option value="">全部领域</option>
+                                <option value="校园">校园</option>
+                                <option value="职场">职场</option>
+                                <option value="美妆">美妆</option>
+                                <option value="科技">科技</option>
+                                <option value="美食">美食</option>
+                                <option value="旅游">旅游</option>
+                                <option value="健身">健身</option>
+                                <option value="母婴">母婴</option>
+                            </select>
+                        </div>
+                        <div class="form-field" style="min-width: 120px;">
+                            <label>排序</label>
+                            <select id="sortBy">
+                                <option value="followers">粉丝数</option>
+                                <option value="price">报价</option>
+                                <option value="engagement_rate">互动率</option>
+                                <option value="conversion_rate">转化率</option>
+                            </select>
+                        </div>
+                        <button class="btn-primary" style="width: auto; padding: 10px 24px;" onclick="applyFilters()">应用筛选</button>
+                        <button class="btn-secondary" onclick="resetFilters()">重置</button>
+                    </div>
+                </div>
+
+                <!-- 达人卡片网格 -->
+                <div id="kolGrid" class="kol-grid">
+                    <div class="empty-state" style="grid-column: 1 / -1;">
+                        <div class="empty-icon">📋</div>
+                        <h3>加载中...</h3>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/explore.js"></script>
+</body>
+</html>

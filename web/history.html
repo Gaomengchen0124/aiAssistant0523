@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>历史记录 - AI KOL 达人匹配助手</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="layout">
+        <nav class="sidebar">
+            <div class="logo">
+                <span class="logo-icon">KOL</span>
+                <span class="logo-text">达人匹配</span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="index.html">首页推荐</a></li>
+                <li class="nav-item"><a href="explore.html">达人库</a></li>
+                <li class="nav-item active"><a href="history.html">历史记录</a></li>
+                <li class="nav-item"><a href="settings.html">设置</a></li>
+            </ul>
+        </nav>
+
+        <main class="main-content">
+            <header class="topbar">
+                <h1>历史记录</h1>
+                <p>查看和管理之前的推荐记录</p>
+            </header>
+
+            <div style="padding: 24px 32px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 style="font-size: 1.1rem;">推荐历史</h2>
+                    <button class="btn-secondary" onclick="clearAllHistory()">清空历史</button>
+                </div>
+
+                <div id="historyList">
+                    <div class="empty-state">
+                        <div class="empty-icon">📋</div>
+                        <h3>暂无历史记录</h3>
+                        <p>在首页完成推荐后，记录将自动保存到这里</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const API_BASE = 'http://127.0.0.1:5000';
+
+        async function loadHistory() {
+            const container = document.getElementById('historyList');
+            try {
+                const response = await fetch(`${API_BASE}/api/history`);
+                const result = await response.json();
+
+                if (!result.success || !result.data || result.data.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">📋</div>
+                            <h3>暂无历史记录</h3>
+                            <p>在首页完成推荐后，记录将自动保存到这里</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = result.data.map(h => `
+                    <div class="history-card" data-id="${h.id}">
+                        <div class="history-info">
+                            <h4>推荐 #${h.id}</h4>
+                            <div class="history-meta">
+                                ${new Date(h.timestamp).toLocaleString()} ·
+                                ${h.demand?.content_field || '综合'} ·
+                                ${h.top10_count} 位达人 ·
+                                均分 ${h.avg_score}
+                            </div>
+                        </div>
+                        <div class="history-actions">
+                            <button class="btn-secondary" onclick="viewHistory(${h.id})">查看</button>
+                            <button class="btn-secondary" onclick="deleteHistory(${h.id})" style="color: #e74c3c;">删除</button>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (e) {
+                container.innerHTML = `<div class="empty-state" style="color: #e74c3c;"><h3>加载失败</h3><p>${e.message}</p></div>`;
+            }
+        }
+
+        function viewHistory(id) {
+            alert(`查看历史记录 #${id}（演示：实际应跳转结果页并恢复数据）`);
+        }
+
+        async function deleteHistory(id) {
+            if (!confirm('确定删除这条记录？')) return;
+            try {
+                await fetch(`${API_BASE}/api/history/${id}`, { method: 'DELETE' });
+                loadHistory();
+            } catch (e) {
+                alert('删除失败: ' + e.message);
+            }
+        }
+
+        async function clearAllHistory() {
+            if (!confirm('确定清空所有历史记录？')) return;
+            try {
+                const resp = await fetch(`${API_BASE}/api/history`);
+                const result = await resp.json();
+                if (result.success) {
+                    for (const h of result.data) {
+                        await fetch(`${API_BASE}/api/history/${h.id}`, { method: 'DELETE' });
+                    }
+                }
+                loadHistory();
+            } catch (e) {
+                alert('清空失败: ' + e.message);
+            }
+        }
+
+        loadHistory();
+    </script>
+</body>
+</html>
