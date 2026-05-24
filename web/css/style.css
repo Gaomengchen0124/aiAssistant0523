@@ -1129,6 +1129,172 @@ tbody.kol-group:hover .detail-row td {
 }
 
 /* ============================================
+   Allocation Layout — 投放名单 + 图表
+   ============================================ */
+.allocation-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+.allocation-left {
+  min-width: 0;
+}
+.allocation-right {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* 投放名单卡片列表 */
+.allocation-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.allocation-card {
+  background: var(--card-bg);
+  padding: 14px 18px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--border-light);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  transition: box-shadow 200ms var(--ease-apple), transform 200ms var(--ease-apple);
+  cursor: default;
+}
+.allocation-card:hover {
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-1px);
+}
+.allocation-card-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.allocation-card .kol-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+.allocation-card .kol-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.allocation-card .kol-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  flex-wrap: wrap;
+}
+.allocation-card .kol-budget-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex-shrink: 0;
+}
+.allocation-card .kol-budget {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--brand-primary);
+  white-space: nowrap;
+}
+.allocation-card .kol-percentage {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}
+
+/* 投放名单卡片 hover 展开详情 */
+.allocation-card-detail {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 200ms ease, margin-top 200ms ease;
+  overflow: hidden;
+}
+.allocation-card-detail > * {
+  min-height: 0;
+  overflow: hidden;
+}
+.allocation-card:hover .allocation-card-detail {
+  grid-template-rows: 1fr;
+  margin-top: 12px;
+}
+.allocation-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.allocation-detail-grid div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.8rem;
+}
+.allocation-detail-grid strong {
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 0.75rem;
+}
+.allocation-detail-grid span {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+.allocation-detail-reason {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+.allocation-detail-link {
+  font-size: 0.85rem;
+}
+.allocation-detail-link a {
+  color: var(--brand-primary);
+  text-decoration: none;
+  font-weight: 500;
+}
+.allocation-detail-link a:hover {
+  text-decoration: underline;
+}
+
+/* 合作状态标签 */
+.contact-status {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: var(--border-light);
+  color: var(--text-tertiary);
+}
+.contact-status.sent {
+  background: var(--success-bg);
+  color: #16a34a;
+}
+
+/* 候选达人池 */
+.candidate-pool {
+  margin-bottom: 24px;
+  overflow-x: auto;
+}
+.candidate-pool h2 {
+  margin-bottom: 16px;
+}
+
+/* ============================================
    Collapsible Sidebar
    ============================================ */
 .form-section {
@@ -1743,6 +1909,7 @@ tbody.kol-group:hover .detail-row td {
       width: 100%;
   }
   .result-layout { grid-template-columns: 1fr; }
+  .allocation-layout { grid-template-columns: 1fr; }
   .result-right {
       flex-direction: row;
       flex-wrap: wrap;
@@ -2018,6 +2185,14 @@ tbody.kol-group:hover .detail-row td {
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
+}
+
+/* 卡片内小号联系按钮 */
+.btn-contact-sm {
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  margin-top: 6px;
+  width: 100%;
 }
 
 .contact-status-badge {

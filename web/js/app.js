@@ -333,48 +333,126 @@ document.getElementById('demandForm').addEventListener('submit', async function(
 
 function renderResult(result, demand) {
     const top10 = result.top10 || [];
-    window._lastTop10 = top10;  // 保存供复制/导出使用
-    window._lastResult = result; // 保存完整结果供导出报告使用
-    window._lastDemand = demand; // 保存需求供导出报告使用
+    window._lastTop10 = top10;
+    window._lastResult = result;
+    window._lastDemand = demand;
     const budgetAlloc = result.budget_allocation || {};
     const platformSummary = result.platform_summary || {};
-
-    const avgScore = top10.length
-        ? (top10.reduce((s, r) => s + r.total_score, 0) / top10.length).toFixed(1)
-        : 0;
+    const allocations = budgetAlloc.allocations || [];
     const totalBudget = demand.total_budget || 15000;
 
     let html = '';
 
-    // Stats cards
+    // ===== Stats Cards =====
+    const kolCount = allocations.length;
+    const platformSet = new Set(allocations.map(a => a.platform).filter(Boolean));
+    const platformCombo = Array.from(platformSet).join(' + ') || '-';
+
+    let avgRoi = '-';
+    if (allocations.length > 0) {
+        const roiValues = [];
+        allocations.forEach(a => {
+            const kol = top10.find(k => k.kol_id === a.kol_id);
+            if (kol && kol.roi) {
+                const m = String(kol.roi).match(/(\d+(\.\d+)?)/);
+                if (m) roiValues.push(parseFloat(m[1]));
+            }
+        });
+        if (roiValues.length > 0) {
+            const avg = roiValues.reduce((s, v) => s + v, 0) / roiValues.length;
+            avgRoi = `1:${avg.toFixed(1)}`;
+        }
+    }
+
     html += `
         <div class="stats-row">
             <div class="stat-card">
-                <div class="stat-value">${top10.length}</div>
-                <div class="stat-label">推荐达人</div>
+                <div class="stat-value">${kolCount}位</div>
+                <div class="stat-label">合作达人</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value">${avgScore}</div>
-                <div class="stat-label">平均匹配分</div>
+                <div class="stat-value">¥${totalBudget.toLocaleString()}</div>
+                <div class="stat-label">总预算</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value">${totalBudget.toLocaleString()}</div>
-                <div class="stat-label">总预算（元）</div>
+                <div class="stat-value">${platformCombo}</div>
+                <div class="stat-label">平台组合</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value">${Object.keys(platformSummary).length}</div>
-                <div class="stat-label">覆盖平台</div>
+                <div class="stat-value">${avgRoi}</div>
+                <div class="stat-label">平均ROI</div>
             </div>
         </div>
     `;
 
-    // Two-column layout
-    html += '<div class="result-layout">';
+    // ===== Allocation Layout (投放名单 + 图表) =====
+    html += '<div class="allocation-layout">';
 
-    // Left: TOP10 Table
-    html += '<div class="result-left">';
+    // Left: 建议实际投放名单
+    html += '<div class="allocation-left">';
+    if (allocations.length > 0) {
+        html += '<div class="card"><h2>建议实际投放名单</h2>';
+        html += '<div class="allocation-list">';
+        allocations.forEach(a => {
+            const kol = top10.find(k => k.kol_id === a.kol_id);
+            const platformClass = { '小红书': 'xhs', '抖音': 'dy', 'B站': 'bz', '微博': 'wb' }[a.platform] || '';
+            const contactInfo = _contactStatus[a.kol_id];
+            const isContacted = contactInfo && contactInfo.status === 'sent';
+            const statusClass = isContacted ? 'sent' : '';
+            const statusText = isContacted ? '已合作' : '未联系';
+            const contactBtnText2 = isContacted ? '查看联系' : '立即联系';
+            const contactBtnClass2 = isContacted ? 'btn-contact sent' : 'btn-contact';
+            const followers2 = kol ? kol.followers : 0;
+            const price2 = kol ? kol.price : 0;
+
+            html += `
+                <div class="allocation-card">
+                    <div class="allocation-card-main">
+                        <div class="kol-info">
+                            <div class="kol-name">${a.kol_name}</div>
+                            <div class="kol-meta">
+                                <span class="platform-badge ${platformClass}">${a.platform || '-'}</span>
+                                <span class="contact-status ${statusClass}">${statusText}</span>
+                            </div>
+                        </div>
+                        <div class="kol-budget-info">
+                            <div class="kol-budget">¥${Math.round(a.allocated).toLocaleString()}</div>
+                            <div class="kol-percentage">${a.percentage}%</div>
+                            <button class="${contactBtnClass2} btn-contact-sm" onclick="event.stopPropagation(); openContactModal('${a.kol_id}', '${a.kol_name}', '${a.platform || ''}', ${followers2}, ${price2}, '${(kol && kol.recommend_reason || '').replace(/'/g, "\\'")}')">${contactBtnText2}</button>
+                        </div>
+                    </div>
+                    <div class="allocation-card-detail">
+                        <div class="allocation-detail-grid">
+                            <div><strong>互动率</strong><span>${kol ? kol.engagement_rate + '%' : '-'}</span></div>
+                            <div><strong>转化率</strong><span>${kol ? kol.conversion_rate + '%' : '-'}</span></div>
+                            <div><strong>合作次数</strong><span>${kol ? kol.cooperation_count + '次' : '-'}</span></div>
+                            <div><strong>受众</strong><span>${kol ? kol.audience : '-'}</span></div>
+                        </div>
+                        <div class="allocation-detail-reason"><strong>推荐理由：</strong>${kol ? (kol.recommend_reason || '-') : '-'}</div>
+                        <div class="allocation-detail-link"><a href="detail.html?id=${a.kol_id}" target="_blank" rel="noopener">查看完整详情 →</a></div>
+                    </div>
+                </div>
+            `;
+        });
+        html += '</div></div>';
+    }
+    html += '</div>';
+
+    // Right: Charts
+    html += '<div class="allocation-right chart-stack">';
+    if (allocations.length > 0) {
+        html += `<div class="chart-card"><h4>预算分配</h4><div id="budgetPie" style="width:100%; height:240px;"></div></div>`;
+    }
+    if (Object.keys(platformSummary).length > 0) {
+        html += `<div class="chart-card"><h4>平台分布</h4><div id="platformBar" style="width:100%; height:240px;"></div></div>`;
+    }
+    html += '</div>';
+
+    html += '</div>';
+
+    // ===== 候选达人池 (全宽表格) =====
     if (top10.length > 0) {
-        html += '<div class="card"><h2>TOP 10 达人推荐</h2>';
+        html += '<div class="candidate-pool card"><h2>候选达人池</h2>';
         html += '<table class="result-content" style="width:100%;"><thead><tr>';
         html += '<th>排名</th><th>达人名称</th><th>平台</th><th>粉丝数</th><th>报价</th>';
         html += '<th>匹配分数</th><th>预估 ROI</th><th>风险</th><th>操作</th>';
@@ -426,53 +504,38 @@ function renderResult(result, demand) {
 
         html += '</table></div>';
     }
-    html += '</div>';
 
-    // Right: Charts
-    html += '<div class="result-right">';
-    if (budgetAlloc.allocations && budgetAlloc.allocations.length > 0) {
-        html += `<div class="chart-card"><h4>预算分配</h4><div id="budgetPie" style="width:100%; height:280px;"></div></div>`;
-    }
-    if (Object.keys(platformSummary).length > 0) {
-        html += `<div class="chart-card"><h4>平台分布</h4><div id="platformBar" style="width:100%; height:280px;"></div></div>`;
-    }
-    html += '</div>';
-
-    html += '</div>';
-
-    // Advice cards
+    // ===== Advice Cards =====
     html += '<div class="advice-cards">';
 
-    // Budget advice
-    if (budgetAlloc.allocations && budgetAlloc.allocations.length > 0) {
-        html += '<div class="advice-card"><h4>💰 预算分配</h4><ul>';
-        budgetAlloc.allocations.forEach(a => {
+    // 为什么选这几位
+    html += '<div class="advice-card"><h4>🎯 为什么选这几位</h4><ul>';
+    top10.slice(0, 3).forEach(kol => {
+        html += `<li><strong>${kol.kol_name}</strong>：${kol.recommend_reason || '综合匹配度高'}</li>`;
+    });
+    html += '</ul></div>';
+
+    // 预算怎么分
+    if (allocations.length > 0) {
+        html += '<div class="advice-card"><h4>💰 预算怎么分</h4><ul>';
+        allocations.forEach(a => {
             html += `<li>${a.kol_name}：${a.allocated.toLocaleString()}元（${a.percentage}%）</li>`;
         });
         html += `<li>预留测试：${budgetAlloc.reserve?.toLocaleString() || 0}元</li>`;
         html += '</ul></div>';
     }
 
-    // Platform advice
-    if (Object.keys(platformSummary).length > 0) {
-        html += '<div class="advice-card"><h4>📊 平台组合</h4><ul>';
-        Object.entries(platformSummary).forEach(([platform, count]) => {
-            html += `<li>${platform}：${count}位达人</li>`;
-        });
-        html += '</ul></div>';
-    }
-
-    // Risk advice from report
+    // 投放注意事项
     const reportText = result.report || '';
     const cautionMatch = reportText.match(/注意事项[：:]([\s\S]*?)(?=$|##)/);
     const caution = cautionMatch ? cautionMatch[1].trim() : '';
     if (caution) {
         const bullets = caution.split(/\n|- /).filter(s => s.trim()).slice(0, 4);
-        html += '<div class="advice-card"><h4>⚠️ 注意事项</h4><ul>';
+        html += '<div class="advice-card"><h4>⚠️ 投放注意事项</h4><ul>';
         bullets.forEach(b => html += `<li>${b.trim().replace(/^-\s*/, '')}</li>`);
         html += '</ul></div>';
     } else {
-        html += '<div class="advice-card"><h4>⚠️ 注意事项</h4><ul><li>最终投放决策需人工复核</li><li>建议优先核实排名前3达人的数据真实性</li></ul></div>';
+        html += '<div class="advice-card"><h4>⚠️ 投放注意事项</h4><ul><li>最终投放决策需人工复核</li><li>建议优先核实排名前3达人的数据真实性</li></ul></div>';
     }
 
     html += '</div>';
@@ -493,7 +556,6 @@ function renderResult(result, demand) {
         }, 100);
     }
 
-    // 保存推荐结果到 sessionStorage，供详情页返回后恢复
     sessionStorage.setItem('kol_recommend_result', JSON.stringify(result));
     sessionStorage.setItem('kol_recommend_demand', JSON.stringify(demand));
     sessionStorage.setItem('kol_recommend_timestamp', Date.now().toString());
