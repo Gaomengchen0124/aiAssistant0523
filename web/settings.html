@@ -59,6 +59,54 @@
                 </div>
 
                 <div class="card" style="margin-bottom: 24px;">
+                    <h2>公司账号</h2>
+                    <div class="form-group">
+                        <label class="form-label">公司 / 品牌名称</label>
+                        <input type="text" id="companyName" placeholder="请输入公司名称">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">联系人</label>
+                        <input type="text" id="contactPerson" placeholder="请输入联系人姓名">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">联系电话</label>
+                        <input type="text" id="contactPhone" placeholder="请输入联系电话">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">联系邮箱</label>
+                        <input type="text" id="contactEmail" placeholder="请输入联系邮箱">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">各平台账号</label>
+                        <div id="platformAccounts" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <div class="platform-account-item">
+                                <label style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 4px; display: block;">小红书</label>
+                                <input type="text" id="account_xhs" placeholder="用户名">
+                                <input type="text" id="note_xhs" placeholder="备注" style="margin-top: 6px;">
+                            </div>
+                            <div class="platform-account-item">
+                                <label style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 4px; display: block;">抖音</label>
+                                <input type="text" id="account_dy" placeholder="用户名">
+                                <input type="text" id="note_dy" placeholder="备注" style="margin-top: 6px;">
+                            </div>
+                            <div class="platform-account-item">
+                                <label style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 4px; display: block;">B站</label>
+                                <input type="text" id="account_bz" placeholder="用户名">
+                                <input type="text" id="note_bz" placeholder="备注" style="margin-top: 6px;">
+                            </div>
+                            <div class="platform-account-item">
+                                <label style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 4px; display: block;">微博</label>
+                                <input type="text" id="account_wb" placeholder="用户名">
+                                <input type="text" id="note_wb" placeholder="备注" style="margin-top: 6px;">
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 12px;">
+                        <button class="btn-primary" style="width: auto; padding: 10px 24px;" onclick="saveCompanySettings()">保存公司账号</button>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-bottom: 24px;">
                     <h2>数据配置</h2>
                     <div class="form-group">
                         <label class="form-label">当前数据文件</label>
@@ -127,10 +175,97 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             loadSettings();
+            loadCompanySettings();
             loadDataInfo();
             document.getElementById('apiKey').addEventListener('input', () => { _apiKeyModified = true; });
             document.getElementById('csvUpload').addEventListener('change', handleCsvUpload);
         });
+
+        // ===== Company Settings =====
+        async function loadCompanySettings() {
+            try {
+                const res = await fetch('/api/company_settings');
+                const result = await res.json();
+                if (!result.success) {
+                    showToast('加载公司账号失败：' + (result.error || '未知错误'), 'error');
+                    return;
+                }
+                const data = result.data;
+                document.getElementById('companyName').value = data.company_name || '';
+                document.getElementById('contactPerson').value = data.contact_person || '';
+                document.getElementById('contactPhone').value = data.contact_phone || '';
+                document.getElementById('contactEmail').value = data.contact_email || '';
+
+                const accounts = data.accounts || {};
+                const platformMap = {
+                    '小红书': { acc: 'account_xhs', note: 'note_xhs' },
+                    '抖音': { acc: 'account_dy', note: 'note_dy' },
+                    'B站': { acc: 'account_bz', note: 'note_bz' },
+                    '微博': { acc: 'account_wb', note: 'note_wb' },
+                };
+                for (const [platform, ids] of Object.entries(platformMap)) {
+                    const acc = accounts[platform];
+                    if (acc) {
+                        document.getElementById(ids.acc).value = acc.username || '';
+                        document.getElementById(ids.note).value = acc.note || '';
+                    }
+                }
+            } catch (e) {
+                showToast('加载公司账号失败：' + e.message, 'error');
+            }
+        }
+
+        async function saveCompanySettings() {
+            const btn = document.querySelector('button[onclick="saveCompanySettings()"]');
+            const originalText = btn.textContent;
+            btn.textContent = '保存中...';
+            btn.disabled = true;
+            btn.style.opacity = '0.7';
+            btn.style.cursor = 'not-allowed';
+
+            const payload = {
+                company_name: document.getElementById('companyName').value.trim(),
+                contact_person: document.getElementById('contactPerson').value.trim(),
+                contact_phone: document.getElementById('contactPhone').value.trim(),
+                contact_email: document.getElementById('contactEmail').value.trim(),
+                accounts: {
+                    '小红书': {
+                        username: document.getElementById('account_xhs').value.trim(),
+                        note: document.getElementById('note_xhs').value.trim(),
+                    },
+                    '抖音': {
+                        username: document.getElementById('account_dy').value.trim(),
+                        note: document.getElementById('note_dy').value.trim(),
+                    },
+                    'B站': {
+                        username: document.getElementById('account_bz').value.trim(),
+                        note: document.getElementById('note_bz').value.trim(),
+                    },
+                    '微博': {
+                        username: document.getElementById('account_wb').value.trim(),
+                        note: document.getElementById('note_wb').value.trim(),
+                    },
+                },
+            };
+
+            try {
+                const res = await fetch('/api/company_settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+                const result = await res.json();
+                if (result.success) {
+                    showToast('公司账号已保存', 'success');
+                } else {
+                    showToast(result.error || '保存失败', 'error');
+                }
+            } catch (e) {
+                showToast('请求失败：' + e.message, 'error');
+            } finally {
+                resetBtn(btn, originalText);
+            }
+        }
 
         async function loadSettings() {
             try {

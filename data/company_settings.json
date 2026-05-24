@@ -1,0 +1,24 @@
+{
+  "company_name": "测试品牌",
+  "contact_person": "张三",
+  "contact_phone": "13800138000",
+  "contact_email": "test@example.com",
+  "accounts": {
+    "小红书": {
+      "username": "test_brand_xhs",
+      "note": "官方号"
+    },
+    "抖音": {
+      "username": "test_brand_dy",
+      "note": "官方号"
+    },
+    "B站": {
+      "username": "test_brand_bilibili",
+      "note": "官方号"
+    },
+    "微博": {
+      "username": "test_brand_weibo",
+      "note": "官方号"
+    }
+  }
+}

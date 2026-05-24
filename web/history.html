@@ -84,8 +84,22 @@
     <script>
         const API_BASE = 'http://127.0.0.1:5000';
         let historyDataCache = []; // 缓存历史数据供筛选和查看使用
+        let contactStatusCache = {}; // 缓存联系状态
+
+        async function loadContactStatus() {
+            try {
+                const resp = await fetch(`${API_BASE}/api/contact_status`);
+                const result = await resp.json();
+                if (result.success && result.data) {
+                    contactStatusCache = result.data;
+                }
+            } catch (e) {
+                console.error('加载联系状态失败:', e);
+            }
+        }
 
         async function loadHistory() {
+            await loadContactStatus();
             const container = document.getElementById('historyList');
             try {
                 const response = await fetch(`${API_BASE}/api/history`);
@@ -200,15 +214,29 @@
                 // TOP3 达人头像缩写
                 const top3 = (h.top10 || []).slice(0, 3).map(k => (k.kol_name || '').charAt(0)).join('');
 
+                // 统计已联系达人
+                const contactedCount = (h.top10 || []).filter(k => contactStatusCache[k.kol_id] && contactStatusCache[k.kol_id].status === 'sent').length;
+
                 // 可展开的达人列表
-                const kolList = (h.top10 || []).map((k, idx) => `
+                const kolList = (h.top10 || []).map((k, idx) => {
+                    const cs = contactStatusCache[k.kol_id];
+                    const isContacted = cs && cs.status === 'sent';
+                    const statusBadge = isContacted
+                        ? `<span class="contact-status-badge sent">已联系</span>`
+                        : `<span class="contact-status-badge pending">待联系</span>`;
+                    return `
                     <div class="history-kol-item">
                         <span class="history-kol-rank">${idx + 1}</span>
                         <span class="history-kol-name">${k.kol_name}</span>
                         <span class="platform-badge ${platformClass[k.platform] || ''}" style="background:${platformColors[k.platform] || '#667eea'}; font-size:0.65rem; padding:1px 6px;">${k.platform}</span>
                         <span class="history-kol-score">${k.total_score}分</span>
-                    </div>
-                `).join('');
+                        ${statusBadge}
+                    </div>`;
+                }).join('');
+
+                const contactCountBadge = contactedCount > 0
+                    ? `<span class="history-contact-count sent">${contactedCount} 人已联系</span>`
+                    : '';
 
                 return `
                     <div class="history-card" data-id="${h.id}">
@@ -222,6 +250,7 @@
                                     <span class="history-meta-item">${dateStr}</span>
                                     <span class="history-meta-item">${h.top10_count} 位达人</span>
                                     ${totalBudget ? `<span class="history-meta-item">预算 ¥${Number(totalBudget).toLocaleString()}</span>` : ''}
+                                    ${contactCountBadge}
                                 </div>
                                 <div class="history-platforms">${platformBadges}</div>
                                 <div class="history-score-bar-row">

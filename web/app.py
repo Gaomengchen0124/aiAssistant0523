@@ -826,6 +826,248 @@ def download_template():
     )
 
 
+# ========== Company Settings Management ==========
+
+COMPANY_SETTINGS_FILE = Path(__file__).parent.parent / "data" / "company_settings.json"
+DEFAULT_COMPANY_SETTINGS = {
+    "company_name": "",
+    "contact_person": "",
+    "contact_phone": "",
+    "contact_email": "",
+    "accounts": {
+        "小红书": {"username": "", "note": ""},
+        "抖音": {"username": "", "note": ""},
+        "B站": {"username": "", "note": ""},
+        "微博": {"username": "", "note": ""},
+    },
+}
+
+
+def _load_company_settings():
+    """加载公司账号配置"""
+    if COMPANY_SETTINGS_FILE.exists():
+        with open(COMPANY_SETTINGS_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return DEFAULT_COMPANY_SETTINGS.copy()
+
+
+def _save_company_settings(data):
+    """保存公司账号配置"""
+    COMPANY_SETTINGS_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with open(COMPANY_SETTINGS_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+
+@app.route("/api/company_settings", methods=["GET"])
+def get_company_settings():
+    """获取公司账号配置"""
+    try:
+        settings = _load_company_settings()
+        return jsonify({"success": True, "data": settings})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/api/company_settings", methods=["POST"])
+def save_company_settings():
+    """保存公司账号配置"""
+    try:
+        data = request.get_json() or {}
+        current = _load_company_settings()
+
+        if "company_name" in data:
+            current["company_name"] = data["company_name"].strip()
+        if "contact_person" in data:
+            current["contact_person"] = data["contact_person"].strip()
+        if "contact_phone" in data:
+            current["contact_phone"] = data["contact_phone"].strip()
+        if "contact_email" in data:
+            current["contact_email"] = data["contact_email"].strip()
+        if "accounts" in data and isinstance(data["accounts"], dict):
+            for platform in current["accounts"]:
+                if platform in data["accounts"]:
+                    current["accounts"][platform]["username"] = (
+                        data["accounts"][platform].get("username", "").strip()
+                    )
+                    current["accounts"][platform]["note"] = (
+                        data["accounts"][platform].get("note", "").strip()
+                    )
+
+        _save_company_settings(current)
+        return jsonify({"success": True, "message": "公司账号配置已保存"})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+# ========== Invitation Generation ==========
+
+INVITATION_TEMPLATE = """您好，{kol_name}！
+
+我是 {company_name} 的 {contact_person}，我们在 {platform} 上关注到您的优质内容，认为您的粉丝画像与我们的品牌高度契合，想邀请您进行一次商业合作。
+
+【合作品牌】{company_name}
+【投放平台】{platform}
+【内容领域】{content_field}
+【目标受众】{target_audience}
+【预算范围】{budget_range}
+
+【合作亮点】
+{recommend_reason}
+
+如果您对此次合作感兴趣，欢迎通过以下方式联系我们：
+- 联系人：{contact_person}
+- 电话：{contact_phone}
+- 邮箱：{contact_email}
+{platform_account_info}
+
+期待您的回复，祝内容创作越来越好！
+
+—— {company_name}
+"""
+
+
+@app.route("/api/generate_invitation", methods=["POST"])
+def generate_invitation():
+    """
+    生成推广邀约话术
+
+    Request: {
+        "kol_id": "KOL_001",
+        "kol_name": "校园成长Ada",
+        "platform": "小红书",
+        "content_field": "校园",
+        "target_audience": "大学生、应届生",
+        "budget_range": "1000-3000",
+        "recommend_reason": "受众匹配度高..."
+    }
+    """
+    try:
+        data = request.get_json() or {}
+        kol_name = data.get("kol_name", "")
+        platform = data.get("platform", "")
+        content_field = data.get("content_field", "")
+        target_audience = data.get("target_audience", "")
+        budget_range = data.get("budget_range", "")
+        recommend_reason = data.get("recommend_reason", "")
+
+        company = _load_company_settings()
+        company_name = company.get("company_name", "【请填写公司名称】")
+        contact_person = company.get("contact_person", "【请填写联系人】")
+        contact_phone = company.get("contact_phone", "【请填写电话】")
+        contact_email = company.get("contact_email", "【请填写邮箱】")
+
+        platform_account = company.get("accounts", {}).get(platform, {})
+        platform_username = platform_account.get("username", "")
+        platform_account_info = ""
+        if platform_username:
+            platform_account_info = f"- {platform}账号：{platform_username}"
+
+        invitation = INVITATION_TEMPLATE.format(
+            kol_name=kol_name,
+            company_name=company_name,
+            contact_person=contact_person,
+            platform=platform,
+            content_field=content_field,
+            target_audience=target_audience,
+            budget_range=budget_range,
+            recommend_reason=recommend_reason or "您的内容质量高，粉丝互动活跃，与我们品牌调性非常匹配。",
+            contact_phone=contact_phone,
+            contact_email=contact_email,
+            platform_account_info=platform_account_info,
+        )
+
+        return jsonify({"success": True, "invitation_text": invitation})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+# ========== Contact Status Management ==========
+
+CONTACT_STATUS_FILE = Path(__file__).parent.parent / "data" / "contact_status.json"
+
+
+def _load_contact_status():
+    """加载联系状态"""
+    if CONTACT_STATUS_FILE.exists():
+        with open(CONTACT_STATUS_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return {}
+
+
+def _save_contact_status(data):
+    """保存联系状态"""
+    CONTACT_STATUS_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with open(CONTACT_STATUS_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+
+@app.route("/api/contact_status", methods=["GET"])
+def get_all_contact_status():
+    """获取所有联系状态"""
+    try:
+        data = _load_contact_status()
+        return jsonify({"success": True, "data": data})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/api/contact_status/<kol_id>", methods=["GET"])
+def get_contact_status(kol_id):
+    """获取单个达人的联系状态"""
+    try:
+        data = _load_contact_status()
+        status = data.get(kol_id)
+        if status:
+            return jsonify({"success": True, "data": status})
+        return jsonify({"success": True, "data": None})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/api/contact_status", methods=["POST"])
+def update_contact_status():
+    """
+    记录/更新联系状态
+
+    Request: {
+        "kol_id": "KOL_001",
+        "kol_name": "校园成长Ada",
+        "platform": "小红书",
+        "status": "sent",
+        "invitation_text": "...",
+        "note": ""
+    }
+    """
+    try:
+        data = request.get_json() or {}
+        kol_id = data.get("kol_id", "").strip()
+        if not kol_id:
+            return jsonify({"success": False, "error": "kol_id 不能为空"}), 400
+
+        all_status = _load_contact_status()
+        now = datetime.now().isoformat()
+
+        entry = all_status.get(kol_id, {})
+        entry.update({
+            "kol_id": kol_id,
+            "kol_name": data.get("kol_name", entry.get("kol_name", "")),
+            "platform": data.get("platform", entry.get("platform", "")),
+            "status": data.get("status", entry.get("status", "pending")),
+            "invitation_text": data.get("invitation_text", entry.get("invitation_text", "")),
+            "note": data.get("note", entry.get("note", "")),
+            "updated_at": now,
+        })
+        if "created_at" not in entry:
+            entry["created_at"] = now
+
+        all_status[kol_id] = entry
+        _save_contact_status(all_status)
+
+        return jsonify({"success": True, "data": entry})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
 if __name__ == "__main__":
     print("=" * 50)
     print("KOL Matcher API Server")

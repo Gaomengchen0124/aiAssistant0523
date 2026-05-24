@@ -1,5 +1,38 @@
 const API_BASE = 'http://127.0.0.1:5000';
 
+// Contact status cache
+let _contactStatus = {};
+let _companySettings = {};
+let _currentDemand = {};
+
+// ========== Load Contact Status on startup ==========
+async function loadContactStatus() {
+    try {
+        const resp = await fetch(`${API_BASE}/api/contact_status`);
+        const result = await resp.json();
+        if (result.success && result.data) {
+            _contactStatus = result.data;
+        }
+    } catch (e) {
+        console.error('加载联系状态失败:', e);
+    }
+}
+
+async function loadCompanySettings() {
+    try {
+        const resp = await fetch(`${API_BASE}/api/company_settings`);
+        const result = await resp.json();
+        if (result.success && result.data) {
+            _companySettings = result.data;
+        }
+    } catch (e) {
+        console.error('加载公司设置失败:', e);
+    }
+}
+
+loadContactStatus();
+loadCompanySettings();
+
 // ========== Sidebar Toggle ==========
 function toggleSidebar() {
     const section = document.getElementById('formSection');
@@ -333,7 +366,7 @@ function renderResult(result, demand) {
         html += '<div class="card"><h2>TOP 10 达人推荐</h2>';
         html += '<table class="result-content" style="width:100%;"><thead><tr>';
         html += '<th>排名</th><th>达人名称</th><th>平台</th><th>粉丝数</th><th>报价</th>';
-        html += '<th>匹配分数</th><th>预估 ROI</th><th>风险</th>';
+        html += '<th>匹配分数</th><th>预估 ROI</th><th>风险</th><th>操作</th>';
         html += '</tr></thead>';
 
         top10.forEach((kol, idx) => {
@@ -344,6 +377,11 @@ function renderResult(result, demand) {
             const riskClass = kol.risk_level === '高' ? 'high' : (kol.risk_level === '中' ? 'medium' : 'low');
             const riskText = kol.risk_level === '高' ? '广告比例高' : (kol.risk_level === '中' ? '需谨慎' : '无风险');
             const followers = kol.followers >= 10000 ? (kol.followers / 10000).toFixed(0) + '万' : kol.followers;
+
+            const contactInfo = _contactStatus[kol.kol_id];
+            const isContacted = contactInfo && contactInfo.status === 'sent';
+            const contactBtnText = isContacted ? '查看联系' : '立即联系';
+            const contactBtnClass = isContacted ? 'btn-contact sent' : 'btn-contact';
 
             html += '<tbody class="kol-group">';
             html += `<tr class="kol-main">`;
@@ -358,10 +396,11 @@ function renderResult(result, demand) {
             </td>`;
             html += `<td>${kol.roi || '-'}</td>`;
             html += `<td><span class="risk-badge ${riskClass}">${riskText}</span></td>`;
+            html += `<td><button class="${contactBtnClass}" onclick="event.stopPropagation(); openContactModal('${kol.kol_id}', '${kol.kol_name}', '${kol.platform}', ${kol.followers}, ${kol.price}, '${(kol.recommend_reason || '').replace(/'/g, "\\'")}')">${contactBtnText}</button></td>`;
             html += `</tr>`;
 
             html += `<tr class="detail-row">`;
-            html += `<td colspan="8">`;
+            html += `<td colspan="9">`;
             html += `<div class="detail-grid">`;
             html += `<div><strong>互动率</strong><span>${kol.engagement_rate}%</span></div>`;
             html += `<div><strong>转化率</strong><span>${kol.conversion_rate}%</span></div>`;
@@ -592,3 +631,157 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 });
+
+// ========== Contact Modal ==========
+
+function openContactModal(kolId, kolName, platform, followers, price, recommendReason) {
+    const existing = document.getElementById('contactModal');
+    if (existing) existing.remove();
+
+    const followersText = followers >= 10000 ? (followers / 10000).toFixed(0) + '万' : followers;
+    const company = _companySettings || {};
+    const isContacted = _contactStatus[kolId] && _contactStatus[kolId].status === 'sent';
+
+    const modal = document.createElement('div');
+    modal.id = 'contactModal';
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>${isContacted ? '查看联系' : '立即联系'} — ${kolName}</h3>
+                <button class="modal-close" onclick="closeContactModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-kol-card">
+                    <div class="modal-kol-avatar">${kolName.charAt(0)}</div>
+                    <div class="modal-kol-name">${kolName}</div>
+                    <div class="modal-kol-meta">
+                        <div><span class="platform-badge ${platform === '小红书' ? 'xhs' : platform === '抖音' ? 'dy' : platform === 'B站' ? 'bz' : 'wb'}">${platform}</span></div>
+                        <div>粉丝：${followersText}</div>
+                        <div>报价：¥${price.toLocaleString()}</div>
+                    </div>
+                </div>
+                <div class="modal-form">
+                    <label>品牌信息</label>
+                    <div class="modal-company-info">
+                        <div><strong>公司/品牌：</strong>${company.company_name || '【未填写】'}</div>
+                        <div><strong>联系人：</strong>${company.contact_person || '【未填写】'}</div>
+                        <div><strong>电话：</strong>${company.contact_phone || '【未填写】'}</div>
+                        <div><strong>邮箱：</strong>${company.contact_email || '【未填写】'}</div>
+                        ${(company.accounts && company.accounts[platform] && company.accounts[platform].username) ? `<div><strong>${platform}账号：</strong>${company.accounts[platform].username}</div>` : ''}
+                    </div>
+                    <label>邀约话术（可编辑）</label>
+                    <textarea id="invitationText" placeholder="正在生成邀约话术...">${isContacted && _contactStatus[kolId].invitation_text ? _contactStatus[kolId].invitation_text : ''}</textarea>
+                    <div class="modal-platform-tip">
+                        💡 请复制上方话术，前往 ${platform} APP 私信达人。后续获得开发者资质后，可在此直接发送。
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeContactModal()">取消</button>
+                <button class="btn-primary" id="btnCopyContact" style="width: auto; padding: 10px 24px;" onclick="copyAndMarkContacted('${kolId}', '${kolName.replace(/'/g, "\\'")}', '${platform}')">${isContacted ? '复制话术' : '复制话术并标记为已联系'}</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    if (!isContacted) {
+        generateInvitation(kolId, kolName, platform, recommendReason);
+    }
+}
+
+function closeContactModal() {
+    const modal = document.getElementById('contactModal');
+    if (modal) {
+        modal.style.opacity = '0';
+        setTimeout(() => modal.remove(), 200);
+    }
+}
+
+async function generateInvitation(kolId, kolName, platform, recommendReason) {
+    const textarea = document.getElementById('invitationText');
+    if (!textarea) return;
+
+    const demand = _currentDemand || {};
+    const payload = {
+        kol_id: kolId,
+        kol_name: kolName,
+        platform: platform,
+        content_field: demand.content_field || '校园',
+        target_audience: demand.target_audience || '大学生、应届生',
+        budget_range: demand.budget_range || '1000-3000',
+        recommend_reason: recommendReason || '',
+    };
+
+    try {
+        const resp = await fetch(`${API_BASE}/api/generate_invitation`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        });
+        const result = await resp.json();
+        if (result.success && textarea) {
+            textarea.value = result.invitation_text;
+        }
+    } catch (e) {
+        console.error('生成邀约失败:', e);
+        if (textarea) {
+            textarea.value = '生成邀约话术失败，请手动编辑。';
+        }
+    }
+}
+
+async function copyAndMarkContacted(kolId, kolName, platform) {
+    const textarea = document.getElementById('invitationText');
+    if (!textarea) return;
+
+    const text = textarea.value.trim();
+    if (!text) {
+        showToast('邀约话术为空，请先填写');
+        return;
+    }
+
+    try {
+        await navigator.clipboard.writeText(text);
+    } catch (e) {
+        showToast('复制失败，请手动复制');
+        return;
+    }
+
+    try {
+        const resp = await fetch(`${API_BASE}/api/contact_status`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                kol_id: kolId,
+                kol_name: kolName,
+                platform: platform,
+                status: 'sent',
+                invitation_text: text,
+            }),
+        });
+        const result = await resp.json();
+        if (result.success) {
+            _contactStatus[kolId] = result.data;
+            showToast('已复制话术并标记为已联系');
+            closeContactModal();
+            // 刷新当前推荐结果以更新按钮状态
+            const cachedResult = sessionStorage.getItem('kol_recommend_result');
+            const cachedDemand = sessionStorage.getItem('kol_recommend_demand');
+            if (cachedResult && cachedDemand) {
+                renderResult(JSON.parse(cachedResult), JSON.parse(cachedDemand));
+            }
+        } else {
+            showToast('标记状态失败：' + (result.error || '未知错误'));
+        }
+    } catch (e) {
+        showToast('请求失败：' + e.message);
+    }
+}
+
+// 在 renderResult 调用时保存当前需求上下文
+const _originalRenderResult = renderResult;
+renderResult = function(result, demand) {
+    _currentDemand = demand;
+    _originalRenderResult(result, demand);
+};

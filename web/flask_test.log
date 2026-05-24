@@ -220,3 +220,15 @@ Open http://127.0.0.1:5000 in your browser
  * Restarting with watchdog (windowsapi)
  * Debugger is active!
  * Debugger PIN: 646-979-739
+ * Detected change in 'D:\\360安全浏览器下载\\ai_assistant\\aiAssistant0523\\src\\config.py', reloading
+==================================================
+KOL Matcher API Server
+==================================================
+Open http://127.0.0.1:5000 in your browser
+==================================================
+ * Restarting with watchdog (windowsapi)
+ * Debugger is active!
+ * Debugger PIN: 646-979-739
+ * Detected change in 'D:\\360安全浏览器下载\\ai_assistant\\aiAssistant0523\\src\\csv_loader.py', reloading
+ * Detected change in 'D:\\360安全浏览器下载\\ai_assistant\\aiAssistant0523\\src\\pipeline.py', reloading
+ * Detected change in 'D:\\360安全浏览器下载\\ai_assistant\\aiAssistant0523\\web\\app.py', reloading

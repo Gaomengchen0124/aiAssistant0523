@@ -1805,3 +1805,270 @@ tbody.kol-group:hover .detail-row td {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-tertiary);
 }
+
+/* ============================================
+   Contact Modal
+   ============================================ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: modalFadeIn 200ms ease forwards;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-content {
+  background: var(--card-bg);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  max-width: 720px;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: modalSlideIn 300ms var(--ease-spring) forwards;
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes modalSlideIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.modal-header h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px;
+  transition: color 150ms ease;
+}
+
+.modal-close:hover {
+  color: var(--text-primary);
+}
+
+.modal-body {
+  padding: 24px;
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 640px) {
+  .modal-body {
+    grid-template-columns: 1fr;
+  }
+}
+
+.modal-kol-card {
+  background: var(--content-bg);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  text-align: center;
+  height: fit-content;
+}
+
+.modal-kol-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(160deg, #4f46e5 0%, #7c3aed 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 auto 12px;
+}
+
+.modal-kol-name {
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 8px;
+}
+
+.modal-kol-meta {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.8;
+}
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modal-form label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+  display: block;
+}
+
+.modal-form textarea {
+  width: 100%;
+  min-height: 200px;
+  padding: 12px 14px;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.6;
+}
+
+.modal-form textarea:focus {
+  outline: none;
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.modal-company-info {
+  background: var(--content-bg);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.8;
+}
+
+.modal-company-info strong {
+  color: var(--text-primary);
+}
+
+.modal-platform-tip {
+  font-size: 0.8rem;
+  color: var(--text-tertiary);
+  padding: 10px 14px;
+  background: rgba(99, 102, 241, 0.04);
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--brand-primary);
+}
+
+.modal-footer {
+  display: flex;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--border-light);
+  justify-content: flex-end;
+}
+
+/* ============================================
+   Contact Button & Status Badge
+   ============================================ */
+.btn-contact {
+  padding: 6px 14px;
+  background: var(--brand-gradient);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 200ms var(--ease-apple);
+  white-space: nowrap;
+}
+
+.btn-contact:hover {
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35);
+  transform: translateY(-1px);
+}
+
+.btn-contact:active {
+  transform: scale(0.95);
+}
+
+.btn-contact.sent {
+  background: var(--success);
+}
+
+.btn-contact:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.contact-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.contact-status-badge.pending {
+  background: var(--warning-bg);
+  color: #d97706;
+}
+
+.contact-status-badge.sent {
+  background: var(--success-bg);
+  color: #16a34a;
+}
+
+.contact-status-badge.replied {
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--brand-primary);
+}
+
+.contact-status-badge.confirmed {
+  background: var(--success-bg);
+  color: #16a34a;
+}
+
+.contact-status-badge.rejected {
+  background: var(--danger-bg);
+  color: #dc2626;
+}
+
+/* Contact status in history */
+.history-contact-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--brand-primary);
+}
+
+.history-contact-count.sent {
+  background: var(--success-bg);
+  color: var(--success);
+}
