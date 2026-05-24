@@ -2953,5 +2953,751 @@
         "小红书": 5
       }
     }
+  },
+  {
+    "id": 14,
+    "timestamp": "2026-05-24T14:41:21.411224",
+    "demand": {
+      "target_audience": "不限、18-25岁、大学生",
+      "content_field": "校园",
+      "budget_range": "1000-3000",
+      "platforms": "小红书,抖音",
+      "total_budget": 15000,
+      "target_roi": 3,
+      "engagement_rate_min": "3.0",
+      "risk_preference": "平衡"
+    },
+    "top10": [
+      {
+        "rank": 1,
+        "kol_id": "KOL_016",
+        "kol_name": "大学生省钱攻略",
+        "platform": "小红书",
+        "followers": 68000,
+        "price": 1600,
+        "engagement_rate": 3.8,
+        "conversion_rate": 3.6,
+        "total_score": 94.0,
+        "match_score": 85.0,
+        "roi": "1:2.3",
+        "risk_level": "低",
+        "cooperation_count": 18,
+        "recommend_reason": "推荐理由：该达人专注大学生省钱领域，粉丝画像与品牌目标受众高度重合。68000粉精准覆盖大学生群体，互动率3.8%远超行业均值，转化率3.6%验证高购买意愿。18次合作经验保障内容稳定输出，1600元报价性价比突出，是低成本触达核心人群的优选。",
+        "audience": "大学生、学生党"
+      },
+      {
+        "rank": 2,
+        "kol_id": "KOL_006",
+        "kol_name": "大学生活指南",
+        "platform": "小红书",
+        "followers": 75000,
+        "price": 1800,
+        "engagement_rate": 3.9,
+        "conversion_rate": 3.4,
+        "total_score": 90.9,
+        "match_score": 95.0,
+        "roi": "1:1.9",
+        "risk_level": "低",
+        "cooperation_count": 20,
+        "recommend_reason": "推荐理由：该达人粉丝画像与目标受众高度重合，7.5万粉精准覆盖大学生群体，互动率3.9%远超行业均值，转化率达3.4%证明内容带货力强。20次合作经验确保执行稳定，1800元报价性价比突出，是高效触达校园用户的优质选择。",
+        "audience": "大学生、18-22岁"
+      },
+      {
+        "rank": 3,
+        "kol_id": "KOL_001",
+        "kol_name": "校园成长Ada",
+        "platform": "小红书",
+        "followers": 50000,
+        "price": 1200,
+        "engagement_rate": 3.8,
+        "conversion_rate": 3.5,
+        "total_score": 86.8,
+        "match_score": 90.0,
+        "roi": "1:2.9",
+        "risk_level": "高",
+        "cooperation_count": 15,
+        "recommend_reason": "推荐理由：Ada在小红书拥有5万精准校园粉丝，互动率3.8%、转化率3.5%均高于行业均值。15次合作经验确保稳定产出，受众与品牌年龄、身份高度重合，1200元报价性价比突出，是校园市场高效触达的优选达人。",
+        "audience": "大学生、应届生、18-25岁"
+      },
+      {
+        "rank": 4,
+        "kol_id": "KOL_042",
+        "kol_name": "校园穿搭日记",
+        "platform": "小红书",
+        "followers": 72000,
+        "price": 1750,
+        "engagement_rate": 3.8,
+        "conversion_rate": 3.4,
+        "total_score": 81.8,
+        "match_score": 85.0,
+        "roi": "1:1.9",
+        "risk_level": "低",
+        "cooperation_count": 16,
+        "recommend_reason": "推荐理由：校园穿搭日记（72k粉）互动率3.8%、转化率3.4%，远超行业均值，合作16次复购验证效果。受众年龄与学历高度匹配，虽性别范围略窄，但核心群体精准，1750元报价性价比极高，是低成本高转化的优质选择。",
+        "audience": "大学生、18-24岁女性"
+      },
+      {
+        "rank": 5,
+        "kol_id": "KOL_066",
+        "kol_name": "大学生实习经验",
+        "platform": "小红书",
+        "followers": 63000,
+        "price": 1550,
+        "engagement_rate": 3.7,
+        "conversion_rate": 3.4,
+        "total_score": 76.8,
+        "match_score": 85.0,
+        "roi": "1:2.2",
+        "risk_level": "低",
+        "cooperation_count": 13,
+        "recommend_reason": "推荐理由：该达人拥有6.3万精准大学生粉丝，互动率3.7%远超行业均值，转化率高达3.4%，13次合作经验验证稳定效果。受众年龄高度匹配，1550元报价性价比突出，是触达大学生群体的高效选择。",
+        "audience": "大学生、大三大四"
+      },
+      {
+        "rank": 6,
+        "kol_id": "KOL_026",
+        "kol_name": "大学生兼职指南",
+        "platform": "小红书",
+        "followers": 55000,
+        "price": 1300,
+        "engagement_rate": 3.6,
+        "conversion_rate": 3.3,
+        "total_score": 76.7,
+        "match_score": 90.0,
+        "roi": "1:2.5",
+        "risk_level": "低",
+        "cooperation_count": 10,
+        "recommend_reason": "推荐理由：该达人粉丝画像与目标受众高度重合（年龄仅上限高2岁），精准触达大学生群体。55000粉量级下互动率3.6%、转化率3.3%均高于行业均值，且已完成10次合作，投放稳定性强。1300元报价性价比突出，适合高效收割学生市场。",
+        "audience": "大学生、18-23岁"
+      },
+      {
+        "rank": 7,
+        "kol_id": "KOL_062",
+        "kol_name": "校园恋爱日记",
+        "platform": "小红书",
+        "followers": 70000,
+        "price": 1700,
+        "engagement_rate": 3.8,
+        "conversion_rate": 3.2,
+        "total_score": 75.7,
+        "match_score": 95.0,
+        "roi": "1:1.9",
+        "risk_level": "高",
+        "cooperation_count": 15,
+        "recommend_reason": "推荐理由：校园恋爱日记以7万粉实现3.8%高互动率，转化率达3.2%，远超行业均值。15次合作验证稳定产出能力，受众年龄与身份高度重合，仅上限略宽。1700元报价性价比突出，是精准触达校园情感人群的优质选择。",
+        "audience": "大学生、18-24岁"
+      },
+      {
+        "rank": 8,
+        "kol_id": "KOL_032",
+        "kol_name": "校园美食探店",
+        "platform": "抖音",
+        "followers": 62000,
+        "price": 1550,
+        "engagement_rate": 3.7,
+        "conversion_rate": 3.3,
+        "total_score": 75.2,
+        "match_score": 95.0,
+        "roi": "1:2.1",
+        "risk_level": "低",
+        "cooperation_count": 14,
+        "recommend_reason": "推荐理由：该达人专注校园美食探店，粉丝6.2万，互动率3.7%远超行业平均，转化率3.3%表现优异。合作14次经验丰富，受众与品牌年龄、身份高度重合，仅年龄上限略宽，性价比突出（报价1550元），适合精准触达学生群体。",
+        "audience": "大学生、18-24岁"
+      },
+      {
+        "rank": 9,
+        "kol_id": "KOL_072",
+        "kol_name": "校园学习方法",
+        "platform": "小红书",
+        "followers": 59000,
+        "price": 1450,
+        "engagement_rate": 3.7,
+        "conversion_rate": 3.3,
+        "total_score": 73.2,
+        "match_score": 85.0,
+        "roi": "1:2.3",
+        "risk_level": "低",
+        "cooperation_count": 11,
+        "recommend_reason": "推荐理由：该达人专注校园学习方法，5.9万粉丝精准覆盖大学生群体，互动率3.7%高于行业均值，转化率达3.3%，合作11次验证稳定效果。虽未覆盖全部18-25岁人群，但受众年龄高度匹配，1450元报价性价比突出，适合教育类产品精准投放。",
+        "audience": "大学生、高中生"
+      },
+      {
+        "rank": 10,
+        "kol_id": "KOL_056",
+        "kol_name": "大学生租房攻略",
+        "platform": "小红书",
+        "followers": 61000,
+        "price": 1500,
+        "engagement_rate": 3.7,
+        "conversion_rate": 3.3,
+        "total_score": 73.2,
+        "match_score": 85.0,
+        "roi": "1:2.2",
+        "risk_level": "低",
+        "cooperation_count": 12,
+        "recommend_reason": "推荐理由：这位拥有6.1万粉的「大学生租房攻略」达人，互动率3.7%、转化率3.3%均高于行业均值，合作12次复购率高。受众与品牌核心人群高度重合，能以真实租房痛点精准触达目标用户，1500元报价性价比突出。",
+        "audience": "大学生、毕业生"
+      }
+    ],
+    "top10_count": 10,
+    "avg_score": 80.4,
+    "budget_allocation": {
+      "allocations": [
+        {
+          "kol_id": "KOL_016",
+          "kol_name": "大学生省钱攻略",
+          "platform": "小红书",
+          "score": 94.0,
+          "allocated": 2621.0,
+          "percentage": 21.8
+        },
+        {
+          "kol_id": "KOL_006",
+          "kol_name": "大学生活指南",
+          "platform": "小红书",
+          "score": 90.9,
+          "allocated": 2535.0,
+          "percentage": 21.1
+        },
+        {
+          "kol_id": "KOL_001",
+          "kol_name": "校园成长Ada",
+          "platform": "小红书",
+          "score": 86.8,
+          "allocated": 2421.0,
+          "percentage": 20.2
+        },
+        {
+          "kol_id": "KOL_042",
+          "kol_name": "校园穿搭日记",
+          "platform": "小红书",
+          "score": 81.8,
+          "allocated": 2280.0,
+          "percentage": 19.0
+        },
+        {
+          "kol_id": "KOL_066",
+          "kol_name": "大学生实习经验",
+          "platform": "小红书",
+          "score": 76.8,
+          "allocated": 2142.0,
+          "percentage": 17.8
+        }
+      ],
+      "reserve": 3000.0,
+      "total": 15000,
+      "platform_summary": {
+        "小红书": 5
+      }
+    }
+  },
+  {
+    "id": 15,
+    "timestamp": "2026-05-24T15:45:04.486786",
+    "demand": {
+      "target_audience": "不限、18-25岁、大学生",
+      "content_field": "校园",
+      "budget_range": "1000-3000",
+      "platforms": "小红书,抖音",
+      "total_budget": 15000,
+      "engagement_rate_min": "3.0",
+      "risk_preference": "平衡"
+    },
+    "top10": [
+      {
+        "rank": 1,
+        "kol_id": "KOL_292",
+        "kol_name": "周周实习手帐",
+        "platform": "抖音",
+        "followers": 92000,
+        "price": 2200,
+        "engagement_rate": 4.0,
+        "conversion_rate": 3.8,
+        "total_score": 94.0,
+        "match_score": 85.0,
+        "roi": "1:1.7",
+        "risk_level": "低",
+        "cooperation_count": 21,
+        "recommend_reason": "推荐理由：周周实习手帐（9.2万粉）报价2200元，互动率4.0%、转化率3.8%，数据远超行业均值。已合作21次，复购率高，验证内容带货力。受众与大学生、实习求职人群高度匹配，精准触达目标用户，性价比突出。",
+        "audience": "应届生、20-24岁、实习求职人群"
+      },
+      {
+        "rank": 2,
+        "kol_id": "KOL_291",
+        "kol_name": "阿梨校园成长记",
+        "platform": "小红书",
+        "followers": 68000,
+        "price": 1600,
+        "engagement_rate": 3.9,
+        "conversion_rate": 3.6,
+        "total_score": 80.6,
+        "match_score": 85.0,
+        "roi": "1:2.3",
+        "risk_level": "低",
+        "cooperation_count": 18,
+        "recommend_reason": "推荐理由：阿梨校园成长记（6.8万粉）互动率3.9%、转化率3.6%，远超同类达人均值，合作18次验证稳定高转化。受众年龄与身份高度契合，仅校园兴趣略有差异，适合精准触达学生群体，性价比突出。",
+        "audience": "大学生、18-24岁、校园兴趣人群"
+      },
+      {
+        "rank": 3,
+        "kol_id": "KOL_377",
+        "kol_name": "阿梨校园生活课",
+        "platform": "小红书",
+        "followers": 72000,
+        "price": 1800,
+        "engagement_rate": 4.0,
+        "conversion_rate": 3.5,
+        "total_score": 70.0,
+        "match_score": 90.0,
+        "roi": "1:1.9",
+        "risk_level": "低",
+        "cooperation_count": 18,
+        "recommend_reason": "推荐理由：阿梨校园生活课（小红书，7.2万粉）报价1800元，互动率4.0%、转化率3.5%，均高于行业均值。已合作18次，复购稳定。受众年龄与人群高度匹配，虽范围略窄但精准度高，适合目标明确的校园类产品投放。",
+        "audience": "大学生、18-23岁、校园生活人群"
+      },
+      {
+        "rank": 4,
+        "kol_id": "KOL_341",
+        "kol_name": "阿禾校招快讯",
+        "platform": "小红书",
+        "followers": 88000,
+        "price": 2500,
+        "engagement_rate": 4.1,
+        "conversion_rate": 3.7,
+        "total_score": 61.0,
+        "match_score": 90.0,
+        "roi": "1:1.5",
+        "risk_level": "低",
+        "cooperation_count": 23,
+        "recommend_reason": "推荐理由：阿禾校招快讯以8.8万精准粉丝、4.1%高互动率及3.7%转化率，展现强内容粘性与商业价值。23次合作经验验证稳定产出，受众与目标人群年龄、身份高度重合，仅职业阶段微差，是校招领域高效触达的优选达人。",
+        "audience": "应届生、20-25岁、校招求职人群"
+      }
+    ],
+    "top10_count": 4,
+    "avg_score": 76.4,
+    "budget_allocation": {
+      "allocations": [
+        {
+          "kol_id": "KOL_292",
+          "kol_name": "周周实习手帐",
+          "platform": "抖音",
+          "score": 94.0,
+          "allocated": 3692.0,
+          "percentage": 30.8
+        },
+        {
+          "kol_id": "KOL_291",
+          "kol_name": "阿梨校园成长记",
+          "platform": "小红书",
+          "score": 80.6,
+          "allocated": 3165.0,
+          "percentage": 26.4
+        },
+        {
+          "kol_id": "KOL_377",
+          "kol_name": "阿梨校园生活课",
+          "platform": "小红书",
+          "score": 70.0,
+          "allocated": 2747.0,
+          "percentage": 22.9
+        },
+        {
+          "kol_id": "KOL_341",
+          "kol_name": "阿禾校招快讯",
+          "platform": "小红书",
+          "score": 61.0,
+          "allocated": 2396.0,
+          "percentage": 20.0
+        }
+      ],
+      "reserve": 3000.0,
+      "total": 15000,
+      "platform_summary": {
+        "小红书": 3,
+        "抖音": 1
+      }
+    }
+  },
+  {
+    "id": 16,
+    "timestamp": "2026-05-24T16:29:34.035729",
+    "demand": {
+      "target_audience": "不限、18-25岁、大学生",
+      "content_field": "校园",
+      "budget_range": "1000-3000",
+      "platforms": "小红书,抖音",
+      "total_budget": 15000,
+      "engagement_rate_min": "3.0",
+      "risk_preference": "平衡"
+    },
+    "top10": [
+      {
+        "rank": 1,
+        "kol_id": "KOL_292",
+        "kol_name": "周周实习手帐",
+        "platform": "抖音",
+        "followers": 92000,
+        "price": 2200,
+        "engagement_rate": 4.0,
+        "conversion_rate": 3.8,
+        "total_score": 94.0,
+        "match_score": 85.0,
+        "roi": "1:1.7",
+        "risk_level": "低",
+        "cooperation_count": 21,
+        "recommend_reason": "推荐理由：周周实习手帐（9.2万粉）报价2200元，互动率4.0%、转化率3.8%，远超行业均值。合作21次，复购率高。受众与大学生、实习求职人群高度重合，精准触达目标用户，性价比突出。",
+        "audience": "应届生、20-24岁、实习求职人群"
+      },
+      {
+        "rank": 2,
+        "kol_id": "KOL_291",
+        "kol_name": "阿梨校园成长记",
+        "platform": "小红书",
+        "followers": 68000,
+        "price": 1600,
+        "engagement_rate": 3.9,
+        "conversion_rate": 3.6,
+        "total_score": 80.6,
+        "match_score": 85.0,
+        "roi": "1:2.3",
+        "risk_level": "低",
+        "cooperation_count": 18,
+        "recommend_reason": "推荐理由：阿梨校园成长记（小红书，6.8万粉）报价1600元，性价比突出。互动率3.9%、转化率3.6%均高于行业均值，18次合作验证稳定效果。受众年龄身份高度匹配，虽校园兴趣略窄，但精准度极高，适合校园类产品高效种草。",
+        "audience": "大学生、18-24岁、校园兴趣人群"
+      },
+      {
+        "rank": 3,
+        "kol_id": "KOL_377",
+        "kol_name": "阿梨校园生活课",
+        "platform": "小红书",
+        "followers": 72000,
+        "price": 1800,
+        "engagement_rate": 4.0,
+        "conversion_rate": 3.5,
+        "total_score": 68.0,
+        "match_score": 85.0,
+        "roi": "1:1.9",
+        "risk_level": "低",
+        "cooperation_count": 18,
+        "recommend_reason": "推荐理由：阿梨校园生活课（7.2万粉）报价仅1800元，互动率4.0%、转化率3.5%，远超行业均值。已合作18次，复购验证效果稳定。受众与大学生群体高度重合，精准匹配品牌目标人群，是低成本高转化的优质选择。",
+        "audience": "大学生、18-23岁、校园生活人群"
+      },
+      {
+        "rank": 4,
+        "kol_id": "KOL_341",
+        "kol_name": "阿禾校招快讯",
+        "platform": "小红书",
+        "followers": 88000,
+        "price": 2500,
+        "engagement_rate": 4.1,
+        "conversion_rate": 3.7,
+        "total_score": 59.0,
+        "match_score": 85.0,
+        "roi": "1:1.5",
+        "risk_level": "低",
+        "cooperation_count": 23,
+        "recommend_reason": "推荐理由：阿禾校招快讯（8.8万粉）互动率4.1%、转化率3.7%，远超行业均值。23次合作验证稳定效果，受众与大学生求职人群高度重合，2500元报价性价比极高，是校招类产品精准触达目标用户的优质选择。",
+        "audience": "应届生、20-25岁、校招求职人群"
+      }
+    ],
+    "top10_count": 4,
+    "avg_score": 75.4,
+    "budget_allocation": {
+      "allocations": [
+        {
+          "kol_id": "KOL_292",
+          "kol_name": "周周实习手帐",
+          "platform": "抖音",
+          "score": 94.0,
+          "allocated": 3741.0,
+          "percentage": 31.2
+        },
+        {
+          "kol_id": "KOL_291",
+          "kol_name": "阿梨校园成长记",
+          "platform": "小红书",
+          "score": 80.6,
+          "allocated": 3207.0,
+          "percentage": 26.7
+        },
+        {
+          "kol_id": "KOL_377",
+          "kol_name": "阿梨校园生活课",
+          "platform": "小红书",
+          "score": 68.0,
+          "allocated": 2704.0,
+          "percentage": 22.5
+        },
+        {
+          "kol_id": "KOL_341",
+          "kol_name": "阿禾校招快讯",
+          "platform": "小红书",
+          "score": 59.0,
+          "allocated": 2348.0,
+          "percentage": 19.6
+        }
+      ],
+      "reserve": 3000.0,
+      "total": 15000,
+      "platform_summary": {
+        "小红书": 3,
+        "抖音": 1
+      }
+    }
+  },
+  {
+    "id": 17,
+    "timestamp": "2026-05-24T16:32:08.834274",
+    "demand": {
+      "target_audience": "不限、22-35岁、职场新人",
+      "content_field": "职场",
+      "budget_range": "2000-5000",
+      "platforms": "抖音,B站",
+      "total_budget": 25000,
+      "engagement_rate_min": "3.0",
+      "risk_preference": "平衡"
+    },
+    "top10": [
+      {
+        "rank": 1,
+        "kol_id": "KOL_300",
+        "kol_name": "阿铭简历门诊室",
+        "platform": "抖音",
+        "followers": 128000,
+        "price": 3800,
+        "engagement_rate": 4.5,
+        "conversion_rate": 4.1,
+        "total_score": 91.5,
+        "match_score": 85.0,
+        "roi": "1:1.1",
+        "risk_level": "高",
+        "cooperation_count": 37,
+        "recommend_reason": "推荐理由：阿铭简历门诊室精准覆盖职场核心人群，128000粉丝中互动率高达4.5%，转化率4.1%远超行业均值。37次合作验证稳定效果，3800元报价性价比突出，是职场类产品高效投放的优选达人。",
+        "audience": "求职人群、22-30岁、白领新人"
+      },
+      {
+        "rank": 2,
+        "kol_id": "KOL_378",
+        "kol_name": "阿泽打工人效率局",
+        "platform": "抖音",
+        "followers": 116000,
+        "price": 3400,
+        "engagement_rate": 4.3,
+        "conversion_rate": 3.9,
+        "total_score": 76.1,
+        "match_score": 85.0,
+        "roi": "1:1.1",
+        "risk_level": "低",
+        "cooperation_count": 32,
+        "recommend_reason": "推荐理由：阿泽打工人效率局，116,000精准粉，互动率4.3%，转化率3.9%，远超行业均值。合作32次，复购验证效果。受众高度匹配职场新人，效率痛点直击，3400元报价性价比突出，是提升转化与品牌曝光的优选。",
+        "audience": "白领新人、22-32岁、效率提升人群"
+      },
+      {
+        "rank": 3,
+        "kol_id": "KOL_344",
+        "kol_name": "阿哲面试不慌",
+        "platform": "抖音",
+        "followers": 108000,
+        "price": 3200,
+        "engagement_rate": 4.2,
+        "conversion_rate": 3.9,
+        "total_score": 69.1,
+        "match_score": 85.0,
+        "roi": "1:1.2",
+        "risk_level": "低",
+        "cooperation_count": 29,
+        "recommend_reason": "推荐理由：阿哲面试不慌（抖音10.8万粉）是职场新人精准触达的优质选择。互动率4.2%、转化率3.9%远超行业均值，29次合作验证稳定产出。受众年龄高度匹配求职与面试提升需求，报价3200元性价比突出，适合高效转化。",
+        "audience": "求职人群、22-30岁、面试提升人群"
+      },
+      {
+        "rank": 4,
+        "kol_id": "KOL_299",
+        "kol_name": "Jason汇报不犯怵",
+        "platform": "B站",
+        "followers": 113000,
+        "price": 3600,
+        "engagement_rate": 4.4,
+        "conversion_rate": 3.8,
+        "total_score": 59.0,
+        "match_score": 85.0,
+        "roi": "1:1.1",
+        "risk_level": "低",
+        "cooperation_count": 33,
+        "recommend_reason": "推荐理由：Jason汇报不犯怵（B站11.3万粉）报价3600元，互动率4.4%、转化率3.8%，远超行业均值。33次合作经验验证稳定产出，受众与职场新人定位高度重合，沟通表达人群精准匹配，是低成本高转化的优质选择。",
+        "audience": "职场新人、23-33岁、沟通表达人群"
+      }
+    ],
+    "top10_count": 4,
+    "avg_score": 73.9,
+    "budget_allocation": {
+      "allocations": [
+        {
+          "kol_id": "KOL_300",
+          "kol_name": "阿铭简历门诊室",
+          "platform": "抖音",
+          "score": 91.5,
+          "allocated": 6187.0,
+          "percentage": 30.9
+        },
+        {
+          "kol_id": "KOL_378",
+          "kol_name": "阿泽打工人效率局",
+          "platform": "抖音",
+          "score": 76.1,
+          "allocated": 5148.0,
+          "percentage": 25.7
+        },
+        {
+          "kol_id": "KOL_344",
+          "kol_name": "阿哲面试不慌",
+          "platform": "抖音",
+          "score": 69.1,
+          "allocated": 4675.0,
+          "percentage": 23.4
+        },
+        {
+          "kol_id": "KOL_299",
+          "kol_name": "Jason汇报不犯怵",
+          "platform": "B站",
+          "score": 59.0,
+          "allocated": 3989.0,
+          "percentage": 19.9
+        }
+      ],
+      "reserve": 5000.0,
+      "total": 25000,
+      "platform_summary": {
+        "抖音": 3,
+        "B站": 1
+      }
+    }
+  },
+  {
+    "id": 18,
+    "timestamp": "2026-05-24T16:33:01.350395",
+    "demand": {
+      "target_audience": "不限、22-35岁、职场新人",
+      "content_field": "职场",
+      "budget_range": "2000-5000",
+      "platforms": "抖音,B站",
+      "total_budget": 25000,
+      "num_kols": 5,
+      "engagement_rate_min": "3.0",
+      "risk_preference": "平衡"
+    },
+    "top10": [
+      {
+        "rank": 1,
+        "kol_id": "KOL_300",
+        "kol_name": "阿铭简历门诊室",
+        "platform": "抖音",
+        "followers": 128000,
+        "price": 3800,
+        "engagement_rate": 4.5,
+        "conversion_rate": 4.1,
+        "total_score": 93.5,
+        "match_score": 90.0,
+        "roi": "1:1.1",
+        "risk_level": "高",
+        "cooperation_count": 37,
+        "recommend_reason": "推荐理由：阿铭简历门诊室，128000精准粉，职场新人高度匹配。互动率4.5%、转化率4.1%，数据远超行业均值；合作37次，复购验证效果。3800元报价，高性价比锁定目标人群。",
+        "audience": "求职人群、22-30岁、白领新人"
+      },
+      {
+        "rank": 2,
+        "kol_id": "KOL_378",
+        "kol_name": "阿泽打工人效率局",
+        "platform": "抖音",
+        "followers": 116000,
+        "price": 3400,
+        "engagement_rate": 4.3,
+        "conversion_rate": 3.9,
+        "total_score": 76.1,
+        "match_score": 85.0,
+        "roi": "1:1.1",
+        "risk_level": "低",
+        "cooperation_count": 32,
+        "recommend_reason": "推荐理由：阿泽打工人效率局精准锁定职场新人，116,000粉丝中年龄高度匹配效率提升需求。互动率4.3%、转化率3.9%远超行业均值，32次合作验证稳定效果。3400元报价高性价比，是抢占职场工具类目心智的优选达人。",
+        "audience": "白领新人、22-32岁、效率提升人群"
+      },
+      {
+        "rank": 3,
+        "kol_id": "KOL_344",
+        "kol_name": "阿哲面试不慌",
+        "platform": "抖音",
+        "followers": 108000,
+        "price": 3200,
+        "engagement_rate": 4.2,
+        "conversion_rate": 3.9,
+        "total_score": 69.1,
+        "match_score": 85.0,
+        "roi": "1:1.2",
+        "risk_level": "低",
+        "cooperation_count": 29,
+        "recommend_reason": "强烈推荐「阿哲面试不慌」！10.8万精准粉，互动率4.2%、转化率3.9%双高，远超行业均值。29次合作验证稳定带货力，受众与职场新人高度匹配，深度覆盖面试提升刚需。3200元报价性价比极高，是高效触达目标人群的优质选择。",
+        "audience": "求职人群、22-30岁、面试提升人群"
+      },
+      {
+        "rank": 4,
+        "kol_id": "KOL_299",
+        "kol_name": "Jason汇报不犯怵",
+        "platform": "B站",
+        "followers": 113000,
+        "price": 3600,
+        "engagement_rate": 4.4,
+        "conversion_rate": 3.8,
+        "total_score": 59.0,
+        "match_score": 85.0,
+        "roi": "1:1.1",
+        "risk_level": "低",
+        "cooperation_count": 33,
+        "recommend_reason": "推荐理由：Jason汇报不犯怵（B站11.3万粉）是职场新人赛道精准达人，报价仅3600元，互动率4.4%、转化率3.8%，数据远超行业均值。33次合作验证稳定产出，受众年龄与职场新人定位高度重合，是低成本高转化的优质选择。",
+        "audience": "职场新人、23-33岁、沟通表达人群"
+      }
+    ],
+    "top10_count": 4,
+    "avg_score": 74.4,
+    "budget_allocation": {
+      "allocations": [
+        {
+          "kol_id": "KOL_300",
+          "kol_name": "阿铭简历门诊室",
+          "platform": "抖音",
+          "score": 93.5,
+          "allocated": 6280.0,
+          "percentage": 31.4
+        },
+        {
+          "kol_id": "KOL_378",
+          "kol_name": "阿泽打工人效率局",
+          "platform": "抖音",
+          "score": 76.1,
+          "allocated": 5114.0,
+          "percentage": 25.6
+        },
+        {
+          "kol_id": "KOL_344",
+          "kol_name": "阿哲面试不慌",
+          "platform": "抖音",
+          "score": 69.1,
+          "allocated": 4644.0,
+          "percentage": 23.2
+        },
+        {
+          "kol_id": "KOL_299",
+          "kol_name": "Jason汇报不犯怵",
+          "platform": "B站",
+          "score": 59.0,
+          "allocated": 3963.0,
+          "percentage": 19.8
+        }
+      ],
+      "reserve": 5000.0,
+      "total": 25000,
+      "platform_summary": {
+        "抖音": 3,
+        "B站": 1
+      }
+    }
   }
 ]

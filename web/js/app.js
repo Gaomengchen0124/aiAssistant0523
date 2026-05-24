@@ -41,6 +41,15 @@ function toggleSidebar() {
     const btn = section.querySelector('.collapse-btn');
     btn.innerHTML = isCollapsed ? '▶' : '◀';
     btn.title = isCollapsed ? '展开表单' : '收起表单';
+
+    setTimeout(() => {
+        ['budgetBar', 'platformBar'].forEach(id => {
+            const dom = document.getElementById(id);
+            if (!dom) return;
+            const chart = echarts.getInstanceByDom(dom);
+            if (chart) chart.resize();
+        });
+    }, 300);
 }
 
 // ========== Toast Notification ==========
@@ -325,6 +334,8 @@ document.getElementById('demandForm').addEventListener('submit', async function(
 function renderResult(result, demand) {
     const top10 = result.top10 || [];
     window._lastTop10 = top10;  // 保存供复制/导出使用
+    window._lastResult = result; // 保存完整结果供导出报告使用
+    window._lastDemand = demand; // 保存需求供导出报告使用
     const budgetAlloc = result.budget_allocation || {};
     const platformSummary = result.platform_summary || {};
 
@@ -420,10 +431,10 @@ function renderResult(result, demand) {
     // Right: Charts
     html += '<div class="result-right">';
     if (budgetAlloc.allocations && budgetAlloc.allocations.length > 0) {
-        html += `<div class="chart-card"><h4>预算分配</h4><div id="budgetPie" style="width:100%; height:220px;"></div></div>`;
+        html += `<div class="chart-card"><h4>预算分配</h4><div id="budgetPie" style="width:100%; height:280px;"></div></div>`;
     }
     if (Object.keys(platformSummary).length > 0) {
-        html += `<div class="chart-card"><h4>平台分布</h4><div id="platformBar" style="width:100%; height:220px;"></div></div>`;
+        html += `<div class="chart-card"><h4>平台分布</h4><div id="platformBar" style="width:100%; height:280px;"></div></div>`;
     }
     html += '</div>';
 
@@ -468,8 +479,8 @@ function renderResult(result, demand) {
 
     // Action bar
     html += `<div class="action-bar">`;
-    html += `<button class="btn-secondary" onclick="copyReport()">📋 复制报告</button>`;
-    html += `<button class="btn-secondary" onclick="exportCSV()">📊 导出 CSV</button>`;
+    html += `<button class="btn-secondary" onclick="copyReport()">📋 复制表格</button>`;
+    html += `<button class="btn-secondary" onclick="exportCSV()">📊 导出表格报告</button>`;
     html += `<button class="btn-secondary" onclick="location.reload()">🔄 重新推荐</button>`;
     html += `</div>`;
 
@@ -477,7 +488,7 @@ function renderResult(result, demand) {
 
     if (budgetAlloc.allocations) {
         setTimeout(() => {
-            renderBudgetPie(budgetAlloc.allocations);
+            renderBudgetPie(budgetAlloc.allocations, budgetAlloc.reserve);
             renderPlatformBar(platformSummary);
         }, 100);
     }
@@ -488,24 +499,39 @@ function renderResult(result, demand) {
     sessionStorage.setItem('kol_recommend_timestamp', Date.now().toString());
 }
 
-function renderBudgetPie(allocations) {
+function renderBudgetPie(allocations, reserveAmount) {
     const chartDom = document.getElementById('budgetPie');
     if (!chartDom) return;
     const chart = echarts.init(chartDom);
     const data = allocations.map(a => ({ value: a.allocated, name: a.kol_name }));
-    if (allocations.length > 0) {
-        const reserve = allocations[0].allocated * 0.25;
+    const reserve = reserveAmount || 0;
+    if (reserve > 0) {
         data.push({ value: reserve, name: '预留测试' });
     }
 
     chart.setOption({
         tooltip: { trigger: 'item', formatter: '{b}: {c}元 ({d}%)' },
+        legend: {
+            orient: 'vertical',
+            right: 10,
+            top: 'center',
+            type: 'scroll',
+            textStyle: { fontSize: 11 }
+        },
         series: [{
             type: 'pie',
-            radius: ['40%', '70%'],
+            radius: ['40%', '65%'],
+            center: ['40%', '50%'],
             avoidLabelOverlap: true,
-            label: { show: false },
-            emphasis: { label: { show: true, fontSize: 12, fontWeight: 'bold' } },
+            label: {
+                show: true,
+                formatter: '{d}%',
+                fontSize: 11
+            },
+            labelLine: { show: true },
+            emphasis: {
+                label: { show: true, fontSize: 12, fontWeight: 'bold' }
+            },
             data: data
         }]
     });
@@ -520,7 +546,7 @@ function renderPlatformBar(platformSummary) {
     const colors = { '小红书': '#ff2442', '抖音': '#1c1c1c', 'B站': '#00a1d6', '微博': '#fa7d3c' };
 
     chart.setOption({
-        tooltip: { trigger: 'axis' },
+        tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
         xAxis: { type: 'category', data: platforms },
         yAxis: { type: 'value', minInterval: 1 },
         series: [{
@@ -529,9 +555,120 @@ function renderPlatformBar(platformSummary) {
                 value: counts[i],
                 itemStyle: { color: colors[p] || '#667eea' }
             })),
-            barWidth: '50%'
+            barWidth: '50%',
+            label: {
+                show: true,
+                position: 'top',
+                formatter: '{c}位',
+                fontSize: 12,
+                fontWeight: 'bold'
+            }
         }]
     });
+}
+
+// Helper: escape CSV field (wrap in quotes if contains comma/newline/quote)
+function _csvEscape(val) {
+    const s = String(val ?? '');
+    if (s.includes(',') || s.includes('"') || s.includes('\n') || s.includes('\r')) {
+        return '"' + s.replace(/"/g, '""') + '"';
+    }
+    return s;
+}
+
+function _buildReportRows() {
+    const top10 = window._lastTop10 || [];
+    const result = window._lastResult || {};
+    const demand = window._lastDemand || {};
+    const budgetAlloc = result.budget_allocation || {};
+    const platformSummary = result.platform_summary || {};
+    const reportText = result.report || '';
+
+    const rows = [];
+    const now = new Date().toLocaleString('zh-CN');
+
+    // ===== Section 1: Report Header =====
+    rows.push(['AI KOL 达人推荐报告']);
+    rows.push(['生成时间', now]);
+    rows.push([]);
+
+    // ===== Section 2: Demand Summary =====
+    rows.push(['【投放需求】']);
+    rows.push(['目标受众', demand.target_audience || '-']);
+    rows.push(['内容领域', demand.content_field || '-']);
+    rows.push(['预算范围（元/达人）', demand.budget_range || '-']);
+    rows.push(['总预算（元）', demand.total_budget || '-']);
+    rows.push(['投放平台', demand.platforms || '-']);
+    rows.push([]);
+
+    // ===== Section 3: KOL Recommendation Table =====
+    rows.push(['【TOP 10 达人推荐明细】']);
+    rows.push([
+        '排名', '达人名称', '平台', '粉丝数', '报价（元）', '匹配分数',
+        '预估ROI', '风险等级', '互动率（%）', '转化率（%）', '合作次数', '受众', '推荐理由'
+    ]);
+
+    top10.forEach((kol, idx) => {
+        const rank = kol.rank || (idx + 1);
+        const riskText = kol.risk_level === '高' ? '广告比例高' : (kol.risk_level === '中' ? '需谨慎' : '无风险');
+        rows.push([
+            rank,
+            kol.kol_name,
+            kol.platform,
+            kol.followers,
+            kol.price,
+            kol.total_score,
+            kol.roi || '-',
+            riskText,
+            kol.engagement_rate != null ? kol.engagement_rate : '-',
+            kol.conversion_rate != null ? kol.conversion_rate : '-',
+            kol.cooperation_count != null ? kol.cooperation_count : '-',
+            kol.audience || '-',
+            kol.recommend_reason || '-'
+        ]);
+    });
+    rows.push([]);
+
+    // ===== Section 4: Budget Allocation =====
+    rows.push(['【预算分配方案】']);
+    const allocations = budgetAlloc.allocations || [];
+    if (allocations.length > 0) {
+        rows.push(['达人名称', '分配金额（元）', '占比（%）']);
+        allocations.forEach(a => {
+            rows.push([a.kol_name, a.allocated, a.percentage]);
+        });
+        rows.push(['预留测试', budgetAlloc.reserve || 0, '-']);
+    } else {
+        rows.push(['暂无预算分配数据']);
+    }
+    rows.push([]);
+
+    // ===== Section 5: Platform Summary =====
+    rows.push(['【平台分布】']);
+    const platforms = Object.keys(platformSummary);
+    if (platforms.length > 0) {
+        rows.push(['平台', '达人数量']);
+        platforms.forEach(p => rows.push([p, platformSummary[p]]));
+    } else {
+        rows.push(['暂无平台分布数据']);
+    }
+    rows.push([]);
+
+    // ===== Section 6: Advice / Notes =====
+    rows.push(['【投放建议与注意事项】']);
+    const cautionMatch = reportText.match(/注意事项[：:]([\s\S]*?)(?=$|##)/);
+    const caution = cautionMatch ? cautionMatch[1].trim() : '';
+    if (caution) {
+        const bullets = caution.split(/\n|- /).filter(s => s.trim()).slice(0, 6);
+        bullets.forEach(b => {
+            const text = b.trim().replace(/^-\s*/, '');
+            if (text) rows.push([text]);
+        });
+    }
+    rows.push(['最终投放决策需人工复核']);
+    rows.push(['对于首次合作的达人，建议人工核实数据真实性']);
+
+    return rows;
 }
 
 function copyReport() {
@@ -540,12 +677,10 @@ function copyReport() {
         alert('暂无推荐数据可复制');
         return;
     }
-    const lines = ['排名,达人名称,平台,粉丝数,报价,匹配分,预估ROI,风险'];
-    top10.forEach((kol, idx) => {
-        lines.push(`${idx + 1},${kol.kol_name},${kol.platform},${kol.followers},${kol.price},${kol.total_score},${kol.roi || '-'},${kol.risk_level || '低'}`);
-    });
-    navigator.clipboard.writeText(lines.join('\n')).then(() => {
-        showToast('报告已复制到剪贴板');
+    const rows = _buildReportRows();
+    const text = rows.map(r => r.map(_csvEscape).join(',')).join('\n');
+    navigator.clipboard.writeText(text).then(() => {
+        showToast('表格报告已复制到剪贴板');
     }).catch(() => {
         alert('复制失败，请手动复制');
     });
@@ -557,22 +692,23 @@ function exportCSV() {
         alert('暂无推荐数据可导出');
         return;
     }
-    const lines = ['﻿排名,达人名称,平台,粉丝数,报价,匹配分,预估ROI,风险'];
-    top10.forEach((kol, idx) => {
-        lines.push(`${idx + 1},${kol.kol_name},${kol.platform},${kol.followers},${kol.price},${kol.total_score},${kol.roi || '-'},${kol.risk_level || '低'}`);
-    });
-    const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const rows = _buildReportRows();
+    const csvContent = '﻿' + rows.map(r => r.map(_csvEscape).join(',')).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `KOL推荐_${new Date().toLocaleDateString()}.csv`;
+    const dateStr = new Date().toISOString().slice(0, 10);
+    a.download = `KOL推荐报告_${dateStr}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-    showToast('CSV 已导出');
+    showToast('表格报告已导出');
 }
 
 window.addEventListener('resize', () => {
-    document.querySelectorAll('.chart-container').forEach(dom => {
+    ['budgetPie', 'platformBar'].forEach(id => {
+        const dom = document.getElementById(id);
+        if (!dom) return;
         const chart = echarts.getInstanceByDom(dom);
         if (chart) chart.resize();
     });
