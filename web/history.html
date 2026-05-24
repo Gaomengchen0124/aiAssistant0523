@@ -28,9 +28,45 @@
             </header>
 
             <div style="padding: 24px 32px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h2 style="font-size: 1.1rem;">推荐历史</h2>
-                    <button class="btn-secondary" onclick="clearAllHistory()">清空历史</button>
+                <!-- 筛选栏 -->
+                <div class="history-filter-bar">
+                    <div class="history-filter-group">
+                        <input type="text" id="filterKeyword" placeholder="搜索内容领域、达人名称..." oninput="applyFilters()">
+                    </div>
+                    <div class="history-filter-group">
+                        <select id="filterPlatform" onchange="applyFilters()">
+                            <option value="">全部平台</option>
+                            <option value="小红书">小红书</option>
+                            <option value="抖音">抖音</option>
+                            <option value="B站">B站</option>
+                            <option value="微博">微博</option>
+                        </select>
+                    </div>
+                    <div class="history-filter-group">
+                        <select id="filterSort" onchange="applyFilters()">
+                            <option value="newest">最新优先</option>
+                            <option value="oldest">最早优先</option>
+                            <option value="score_high">均分从高到低</option>
+                            <option value="score_low">均分从低到高</option>
+                        </select>
+                    </div>
+                    <button class="btn-secondary" onclick="clearAllHistory()" style="margin-left: auto;">清空历史</button>
+                </div>
+
+                <!-- 统计摘要 -->
+                <div id="historyStats" class="history-stats" style="display:none;">
+                    <div class="history-stat-item">
+                        <span class="history-stat-value" id="statTotal">0</span>
+                        <span class="history-stat-label">总记录</span>
+                    </div>
+                    <div class="history-stat-item">
+                        <span class="history-stat-value" id="statAvgScore">0</span>
+                        <span class="history-stat-label">平均均分</span>
+                    </div>
+                    <div class="history-stat-item">
+                        <span class="history-stat-value" id="statTotalKols">0</span>
+                        <span class="history-stat-label">累计推荐</span>
+                    </div>
                 </div>
 
                 <div id="historyList">
@@ -38,6 +74,7 @@
                         <div class="empty-icon">📋</div>
                         <h3>暂无历史记录</h3>
                         <p>在首页完成推荐后，记录将自动保存到这里</p>
+                        <a href="index.html" class="btn-primary" style="margin-top: 16px; width: auto; padding: 12px 24px; text-decoration: none; display: inline-block;">前往推荐</a>
                     </div>
                 </div>
             </div>
@@ -46,6 +83,7 @@
 
     <script>
         const API_BASE = 'http://127.0.0.1:5000';
+        let historyDataCache = []; // 缓存历史数据供筛选和查看使用
 
         async function loadHistory() {
             const container = document.getElementById('historyList');
@@ -59,63 +97,204 @@
                             <div class="empty-icon">📋</div>
                             <h3>暂无历史记录</h3>
                             <p>在首页完成推荐后，记录将自动保存到这里</p>
+                            <a href="index.html" class="btn-primary" style="margin-top: 16px; width: auto; padding: 12px 24px; text-decoration: none; display: inline-block;">前往推荐</a>
                         </div>
                     `;
+                    document.getElementById('historyStats').style.display = 'none';
+                    historyDataCache = [];
                     return;
                 }
 
-                container.innerHTML = result.data.map(h => `
-                    <div class="history-card" data-id="${h.id}">
-                        <div class="history-info">
-                            <h4>推荐 #${h.id}</h4>
-                            <div class="history-meta">
-                                ${new Date(h.timestamp).toLocaleString()} ·
-                                ${h.demand?.content_field || '综合'} ·
-                                ${h.top10_count} 位达人 ·
-                                均分 ${h.avg_score}
-                            </div>
-                        </div>
-                        <div class="history-actions">
-                            <button class="btn-secondary" onclick="viewHistory(${h.id})">查看</button>
-                            <button class="btn-secondary" onclick="deleteHistory(${h.id})" style="color: #e74c3c;">删除</button>
-                        </div>
-                    </div>
-                `).join('');
-
+                historyDataCache = result.data;
+                applyFilters();
             } catch (e) {
                 container.innerHTML = `<div class="empty-state" style="color: #e74c3c;"><h3>加载失败</h3><p>${e.message}</p></div>`;
+                document.getElementById('historyStats').style.display = 'none';
             }
         }
 
-        function viewHistory(id) {
-            const entry = result.data.find(h => h.id === id);
-            if (entry) {
-                localStorage.setItem('kol_history_view', JSON.stringify(entry));
-                location.href = 'index.html?mode=history';
+        function applyFilters() {
+            const keyword = document.getElementById('filterKeyword').value.trim().toLowerCase();
+            const platform = document.getElementById('filterPlatform').value;
+            const sort = document.getElementById('filterSort').value;
+
+            let filtered = historyDataCache.slice();
+
+            // 关键词筛选
+            if (keyword) {
+                filtered = filtered.filter(h => {
+                    const field = (h.demand?.content_field || '').toLowerCase();
+                    const kolNames = (h.top10 || []).map(k => k.kol_name).join(' ').toLowerCase();
+                    return field.includes(keyword) || kolNames.includes(keyword);
+                });
             }
+
+            // 平台筛选
+            if (platform) {
+                filtered = filtered.filter(h => {
+                    const platforms = (h.top10 || []).map(k => k.platform);
+                    return platforms.includes(platform);
+                });
+            }
+
+            // 排序
+            filtered.sort((a, b) => {
+                switch (sort) {
+                    case 'oldest': return new Date(a.timestamp) - new Date(b.timestamp);
+                    case 'score_high': return (b.avg_score || 0) - (a.avg_score || 0);
+                    case 'score_low': return (a.avg_score || 0) - (b.avg_score || 0);
+                    case 'newest':
+                    default: return new Date(b.timestamp) - new Date(a.timestamp);
+                }
+            });
+
+            updateStats(historyDataCache);
+            renderHistoryList(filtered);
+        }
+
+        function updateStats(data) {
+            const stats = document.getElementById('historyStats');
+            if (data.length === 0) {
+                stats.style.display = 'none';
+                return;
+            }
+            stats.style.display = 'flex';
+            document.getElementById('statTotal').textContent = data.length;
+            const avgScore = data.reduce((s, h) => s + (h.avg_score || 0), 0) / data.length;
+            document.getElementById('statAvgScore').textContent = avgScore.toFixed(1);
+            document.getElementById('statTotalKols').textContent = data.reduce((s, h) => s + (h.top10_count || 0), 0);
+        }
+
+        function renderHistoryList(data) {
+            const container = document.getElementById('historyList');
+            if (data.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">🔍</div>
+                        <h3>没有符合条件的记录</h3>
+                        <p>尝试调整筛选条件或清除关键词</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = data.map(h => {
+                const dateStr = new Date(h.timestamp).toLocaleString();
+                const field = h.demand?.content_field || '综合';
+                const totalBudget = h.demand?.total_budget || h.demand?.budget_total || 0;
+
+                // 平台分布
+                const platforms = [...new Set((h.top10 || []).map(k => k.platform))];
+                const platformClass = { '小红书': 'xhs', '抖音': 'dy', 'B站': 'bz', '微博': 'wb' };
+                const platformColors = { '小红书': '#ff2442', '抖音': '#1c1c1c', 'B站': '#00a1d6', '微博': '#fa7d3c' };
+                const platformBadges = platforms.map(p =>
+                    `<span class="platform-badge ${platformClass[p] || ''}" style="background:${platformColors[p] || '#667eea'}; font-size:0.7rem; padding:2px 8px;">${p}</span>`
+                ).join('');
+
+                // 分数区间
+                const scores = (h.top10 || []).map(k => k.total_score || 0);
+                const minScore = scores.length ? Math.min(...scores) : 0;
+                const maxScore = scores.length ? Math.max(...scores) : 0;
+                const scoreBarClass = h.avg_score >= 80 ? 'high' : (h.avg_score >= 60 ? 'medium' : 'low');
+
+                // TOP3 达人头像缩写
+                const top3 = (h.top10 || []).slice(0, 3).map(k => (k.kol_name || '').charAt(0)).join('');
+
+                // 可展开的达人列表
+                const kolList = (h.top10 || []).map((k, idx) => `
+                    <div class="history-kol-item">
+                        <span class="history-kol-rank">${idx + 1}</span>
+                        <span class="history-kol-name">${k.kol_name}</span>
+                        <span class="platform-badge ${platformClass[k.platform] || ''}" style="background:${platformColors[k.platform] || '#667eea'}; font-size:0.65rem; padding:1px 6px;">${k.platform}</span>
+                        <span class="history-kol-score">${k.total_score}分</span>
+                    </div>
+                `).join('');
+
+                return `
+                    <div class="history-card" data-id="${h.id}">
+                        <div class="history-card-main">
+                            <div class="history-info">
+                                <div class="history-header">
+                                    <h4>推荐 #${h.id} · ${field}</h4>
+                                    <div class="history-avatar-group">${top3}</div>
+                                </div>
+                                <div class="history-meta">
+                                    <span class="history-meta-item">${dateStr}</span>
+                                    <span class="history-meta-item">${h.top10_count} 位达人</span>
+                                    ${totalBudget ? `<span class="history-meta-item">预算 ¥${Number(totalBudget).toLocaleString()}</span>` : ''}
+                                </div>
+                                <div class="history-platforms">${platformBadges}</div>
+                                <div class="history-score-bar-row">
+                                    <div class="history-score-bar">
+                                        <div class="history-score-bar-fill ${scoreBarClass}" style="width:${h.avg_score || 0}%"></div>
+                                    </div>
+                                    <span class="history-score-label">均分 ${h.avg_score || 0}（${minScore}-${maxScore}）</span>
+                                </div>
+                            </div>
+                            <div class="history-actions">
+                                <button class="btn-secondary" onclick="viewHistory(${h.id})">查看</button>
+                                <button class="btn-secondary" onclick="deleteHistory(${h.id})" style="color: #e74c3c;">删除</button>
+                            </div>
+                        </div>
+                        <div class="history-kol-toggle" onclick="toggleKolList(this)">
+                            <span>达人明细 ▼</span>
+                        </div>
+                        <div class="history-kol-list" style="display:none;">
+                            ${kolList}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function toggleKolList(el) {
+            const list = el.nextElementSibling;
+            const isHidden = list.style.display === 'none';
+            list.style.display = isHidden ? 'block' : 'none';
+            el.querySelector('span').textContent = isHidden ? '达人明细 ▲' : '达人明细 ▼';
+        }
+
+        async function viewHistory(id) {
+            // 从缓存中查找，如果没有则调用 API
+            let entry = historyDataCache.find(h => h.id === id);
+            if (!entry) {
+                try {
+                    const resp = await fetch(`${API_BASE}/api/history/${id}`);
+                    const result = await resp.json();
+                    if (result.success) {
+                        entry = result.data;
+                    }
+                } catch (e) {
+                    console.error('获取历史记录失败:', e);
+                }
+            }
+            if (!entry) {
+                alert('未找到该历史记录');
+                return;
+            }
+            localStorage.setItem('kol_history_view', JSON.stringify(entry));
+            location.href = 'index.html?mode=history';
         }
 
         async function deleteHistory(id) {
             if (!confirm('确定删除这条记录？')) return;
             try {
                 await fetch(`${API_BASE}/api/history/${id}`, { method: 'DELETE' });
-                loadHistory();
+                historyDataCache = historyDataCache.filter(h => h.id !== id);
+                applyFilters();
             } catch (e) {
                 alert('删除失败: ' + e.message);
             }
         }
 
         async function clearAllHistory() {
-            if (!confirm('确定清空所有历史记录？')) return;
+            if (!confirm('确定清空所有历史记录？此操作不可恢复。')) return;
             try {
-                const resp = await fetch(`${API_BASE}/api/history`);
-                const result = await resp.json();
-                if (result.success) {
-                    for (const h of result.data) {
-                        await fetch(`${API_BASE}/api/history/${h.id}`, { method: 'DELETE' });
-                    }
+                for (const h of historyDataCache) {
+                    await fetch(`${API_BASE}/api/history/${h.id}`, { method: 'DELETE' });
                 }
-                loadHistory();
+                historyDataCache = [];
+                applyFilters();
             } catch (e) {
                 alert('清空失败: ' + e.message);
             }

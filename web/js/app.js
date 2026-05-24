@@ -172,6 +172,11 @@ function fillForm(type) {
 document.getElementById('demandForm').addEventListener('submit', async function(e) {
     e.preventDefault();
 
+    // 清除旧缓存，避免新搜索后显示旧结果
+    sessionStorage.removeItem('kol_recommend_result');
+    sessionStorage.removeItem('kol_recommend_demand');
+    sessionStorage.removeItem('kol_recommend_timestamp');
+
     const btn = e.target.querySelector('.btn-primary');
     const btnText = btn.querySelector('.btn-text');
     const spinner = btn.querySelector('.spinner');
@@ -329,7 +334,7 @@ function renderResult(result, demand) {
         html += '<table class="result-content" style="width:100%;"><thead><tr>';
         html += '<th>排名</th><th>达人名称</th><th>平台</th><th>粉丝数</th><th>报价</th>';
         html += '<th>匹配分数</th><th>预估 ROI</th><th>风险</th>';
-        html += '</tr></thead><tbody>';
+        html += '</tr></thead>';
 
         top10.forEach((kol, idx) => {
             const rank = kol.rank || (idx + 1);
@@ -340,7 +345,8 @@ function renderResult(result, demand) {
             const riskText = kol.risk_level === '高' ? '广告比例高' : (kol.risk_level === '中' ? '需谨慎' : '无风险');
             const followers = kol.followers >= 10000 ? (kol.followers / 10000).toFixed(0) + '万' : kol.followers;
 
-            html += `<tr onmouseenter="showDetail(this, ${idx})" onmouseleave="hideDetail(this)">`;
+            html += '<tbody class="kol-group">';
+            html += `<tr class="kol-main">`;
             html += `<td>${rankIcon}</td>`;
             html += `<td><strong>${kol.kol_name}</strong></td>`;
             html += `<td><span class="platform-badge ${platformClass}">${kol.platform}</span></td>`;
@@ -354,20 +360,21 @@ function renderResult(result, demand) {
             html += `<td><span class="risk-badge ${riskClass}">${riskText}</span></td>`;
             html += `</tr>`;
 
-            html += `<tr class="detail-row" id="detail-${idx}" style="display:none; background:#f8f9ff;">`;
-            html += `<td colspan="8" style="padding:16px;">`;
-            html += `<div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:12px; margin-bottom:12px;">`;
-            html += `<div><strong>互动率</strong><br>${kol.engagement_rate}%</div>`;
-            html += `<div><strong>转化率</strong><br>${kol.conversion_rate}%</div>`;
-            html += `<div><strong>合作次数</strong><br>${kol.cooperation_count}次</div>`;
-            html += `<div><strong>受众</strong><br>${kol.audience}</div>`;
+            html += `<tr class="detail-row">`;
+            html += `<td colspan="8">`;
+            html += `<div class="detail-grid">`;
+            html += `<div><strong>互动率</strong><span>${kol.engagement_rate}%</span></div>`;
+            html += `<div><strong>转化率</strong><span>${kol.conversion_rate}%</span></div>`;
+            html += `<div><strong>合作次数</strong><span>${kol.cooperation_count}次</span></div>`;
+            html += `<div><strong>受众</strong><span>${kol.audience}</span></div>`;
             html += `</div>`;
-            html += `<div><strong>推荐理由：</strong>${kol.recommend_reason || '-'}</div>`;
-            html += `<div style="margin-top:8px;"><a href="detail.html?id=${kol.kol_id}" style="color:#667eea;">查看完整详情 →</a></div>`;
+            html += `<div class="detail-reason"><strong>推荐理由：</strong>${kol.recommend_reason || '-'}</div>`;
+            html += `<div class="detail-link"><a href="detail.html?id=${kol.kol_id}" target="_blank" rel="noopener">查看完整详情 →</a></div>`;
             html += `</td></tr>`;
+            html += '</tbody>';
         });
 
-        html += '</tbody></table></div>';
+        html += '</table></div>';
     }
     html += '</div>';
 
@@ -435,19 +442,11 @@ function renderResult(result, demand) {
             renderPlatformBar(platformSummary);
         }, 100);
     }
-}
 
-function showDetail(row, idx) {
-    const detailRow = document.getElementById(`detail-${idx}`);
-    if (detailRow) detailRow.style.display = 'table-row';
-}
-
-function hideDetail(row) {
-    let next = row.nextElementSibling;
-    while (next && !next.classList.contains('detail-row')) {
-        next = next.nextElementSibling;
-    }
-    if (next) next.style.display = 'none';
+    // 保存推荐结果到 sessionStorage，供详情页返回后恢复
+    sessionStorage.setItem('kol_recommend_result', JSON.stringify(result));
+    sessionStorage.setItem('kol_recommend_demand', JSON.stringify(demand));
+    sessionStorage.setItem('kol_recommend_timestamp', Date.now().toString());
 }
 
 function renderBudgetPie(allocations) {
@@ -540,19 +539,22 @@ window.addEventListener('resize', () => {
     });
 });
 
-// ========== Restore from History ==========
+// ========== Restore from History / Session ==========
 document.addEventListener('DOMContentLoaded', () => {
     const params = new URLSearchParams(location.search);
+
+    // 从历史记录页面恢复
     if (params.get('mode') === 'history') {
         const historyData = localStorage.getItem('kol_history_view');
         if (historyData) {
             try {
                 const entry = JSON.parse(historyData);
+                const budgetAlloc = entry.budget_allocation || {};
                 const result = {
                     top10: entry.top10 || [],
                     report: '',
-                    budget_allocation: entry.budget_allocation || null,
-                    platform_summary: entry.budget_allocation?.platform_summary || {},
+                    budget_allocation: budgetAlloc,
+                    platform_summary: budgetAlloc.platform_summary || {},
                 };
                 renderResult(result, entry.demand || {});
                 localStorage.removeItem('kol_history_view');
@@ -561,6 +563,32 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (e) {
                 console.error('恢复历史记录失败:', e);
             }
+        }
+        return;
+    }
+
+    // 从 sessionStorage 恢复推荐结果（详情页返回）
+    const cachedResult = sessionStorage.getItem('kol_recommend_result');
+    const cachedDemand = sessionStorage.getItem('kol_recommend_demand');
+    const timestamp = sessionStorage.getItem('kol_recommend_timestamp');
+
+    if (cachedResult && cachedDemand && timestamp) {
+        const age = Date.now() - parseInt(timestamp);
+        // 缓存有效期 30 分钟
+        if (age < 30 * 60 * 1000) {
+            try {
+                renderResult(JSON.parse(cachedResult), JSON.parse(cachedDemand));
+            } catch (e) {
+                console.error('恢复推荐结果失败:', e);
+                sessionStorage.removeItem('kol_recommend_result');
+                sessionStorage.removeItem('kol_recommend_demand');
+                sessionStorage.removeItem('kol_recommend_timestamp');
+            }
+        } else {
+            // 缓存过期，清除
+            sessionStorage.removeItem('kol_recommend_result');
+            sessionStorage.removeItem('kol_recommend_demand');
+            sessionStorage.removeItem('kol_recommend_timestamp');
         }
     }
 });

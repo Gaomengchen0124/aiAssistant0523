@@ -22,8 +22,13 @@ load_dotenv()
 class KOLPipeline:
     """达人推荐流程编排"""
 
-    def __init__(self, csv_path: str = "data/influencers.csv", use_llm: bool = True):
-        self.csv_path = csv_path
+    def __init__(self, csv_path: str = None, use_llm: bool = True):
+        if csv_path is not None:
+            self.csv_path = csv_path
+        else:
+            # Delayed import to avoid circular dependency with config
+            from config import get_data_path
+            self.csv_path = str(get_data_path())
         self.use_llm = use_llm
         self.llm_client: LLMClient | None = None
         if use_llm:

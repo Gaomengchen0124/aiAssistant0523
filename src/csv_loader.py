@@ -20,8 +20,13 @@ class CSVLoader:
         "engagement_rate", "conversion_rate", "cooperation_count",
     ]
 
-    def __init__(self, csv_path: str = "data/influencers.csv"):
-        self.csv_path = Path(csv_path)
+    def __init__(self, csv_path: str = None):
+        if csv_path is not None:
+            self.csv_path = Path(csv_path)
+        else:
+            # Delayed import to avoid circular dependency with config
+            from config import get_data_path
+            self.csv_path = get_data_path()
 
     def load(self) -> pd.DataFrame:
         """读取 CSV 并进行字段类型转换"""

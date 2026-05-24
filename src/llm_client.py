@@ -158,31 +158,56 @@ class LLMClient:
             }
         """
         system_prompt = (
-            "你是一位需求分析师，擅长从用户的自由文本中提取结构化的投放需求信息。"
-            "请从以下文本中提取关键信息，并以 JSON 格式返回。"
-            "如果某项信息无法从文本中推断，请返回 null。"
+            "你是一位专业的营销需求分析师，擅长从用户的产品描述和投放需求中提取结构化的投放参数。"
+            "请严格按以下规则提取，不要猜测用户没有明确提到的信息。"
             "返回格式必须是合法的 JSON，不要包含任何其他文字。"
         )
 
         user_prompt = (
             f"请分析以下投放需求文本，提取结构化信息：\n\n{text}\n\n"
+            "=== 字段定义与提取规则 ===\n"
+            "1. gender: 性别偏好。只能从文本中明确提到的推断，未提及则 null。\n"
+            "2. age_min / age_max: 年龄范围。根据受众身份推断，多场景时取覆盖最广的范围。"
+            "例如'大学生'→18-24，'职场新人'→22-28，'宝妈'→25-35。"
+            "如果同时提到多个场景（如'校园、办公'），取并集范围，不要只取最窄的。\n"
+            "3. occupation: 目标受众的职业或身份。如'大学生''白领''宝妈'。"
+            "注意区分：'校园''职场'是场景/内容领域，不是受众身份。"
+            "多个场景的受众用顿号连接，如'学生、白领'。\n"
+            "4. content_field: 内容领域/产品类别。根据产品关键词推断："
+            "'鼠标''耳机''手机'→'数码'，'护肤品''口红'→'美妆'，'课程''培训'→'教育'，"
+            "'母婴用品'→'母婴'，'零食''饮料'→'美食'。"
+            "如果产品不明确，根据场景推断（如'校园推广'→'校园'）。\n"
+            "5. platforms: 投放平台列表。只提取明确提到的平台名称。\n"
+            "6. target_roi: 期望 ROI。提取文本中 ROI 相关的数字。"
+            "如'ROI 1:3''回报 1:3''roi为1：3'均提取为 3.0。\n"
+            "7. total_budget: 总预算。提取明确提到的金额数字。\n"
+            "8. confidence: 信息完整度（0-1）。提取越完整、推断依据越明确，分数越高。\n\n"
+            "=== 示例 ===\n"
+            "输入：'推广一款考研英语课程，面向大三学生，预算2万，主要投小红书'\n"
+            '输出：{"gender": "不限", "age_min": 20, "age_max": 23, "occupation": "大学生", '
+            '"content_field": "教育", "budget_min": null, "budget_max": null, "platforms": ["小红书"], '
+            '"total_budget": 20000, "target_roi": null, "confidence": 0.85}\n\n'
+            "输入：'一款静音鼠标的产品宣发，服务校园、办公场景，希望roi为1：3，优先选择小红书和抖音'\n"
+            '输出：{"gender": "不限", "age_min": 18, "age_max": 35, "occupation": "学生、白领", '
+            '"content_field": "数码", "budget_min": null, "budget_max": null, "platforms": ["小红书", "抖音"], '
+            '"total_budget": null, "target_roi": 3.0, "confidence": 0.75}\n\n'
             "请返回以下字段的 JSON 格式：\n"
             '{\n'
-            '  "gender": "性别：男/女/不限，推断不出则 null",\n'
-            '  "age_min": "目标年龄下限，数字，推断不出则 null",\n'
-            '  "age_max": "目标年龄上限，数字，推断不出则 null",\n'
-            '  "occupation": "职业或身份描述，如大学生、职场新人、宝妈等，推断不出则 null",\n'
-            '  "content_field": "内容领域，如校园、职场、美妆、科技、美食、旅游、健身、母婴，推断不出则 null",\n'
-            '  "budget_min": "预算下限（元），数字，推断不出则 null",\n'
-            '  "budget_max": "预算上限（元），数字，推断不出则 null",\n'
-            '  "platforms": ["投放平台列表，如小红书、抖音、B站、微博，推断不出则 []"],\n'
-            '  "engagement_rate_min": "最低互动率要求（%），数字，推断不出则 null",\n'
-            '  "conversion_rate_min": "最低转化率要求（%），数字，推断不出则 null",\n'
-            '  "risk_preference": "风险偏好：保守/平衡/激进，推断不出则 null",\n'
-            '  "total_budget": "总预算（元），数字，推断不出则 null",\n'
-            '  "num_kols": "期望合作达人数量，数字，推断不出则 null",\n'
-            '  "target_roi": "期望ROI（如 1:3 则返回 3.0），数字，推断不出则 null",\n'
-            '  "confidence": "信息完整度置信度（0-1），数字"\n'
+            '  "gender": ...,\n'
+            '  "age_min": ...,\n'
+            '  "age_max": ...,\n'
+            '  "occupation": ...,\n'
+            '  "content_field": ...,\n'
+            '  "budget_min": ...,\n'
+            '  "budget_max": ...,\n'
+            '  "platforms": [...],\n'
+            '  "engagement_rate_min": ...,\n'
+            '  "conversion_rate_min": ...,\n'
+            '  "risk_preference": ...,\n'
+            '  "total_budget": ...,\n'
+            '  "num_kols": ...,\n'
+            '  "target_roi": ...,\n'
+            '  "confidence": ...\n'
             '}'
         )
 

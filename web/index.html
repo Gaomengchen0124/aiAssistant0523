@@ -100,11 +100,11 @@
                                 <label class="form-label">投放配置</label>
                                 <div class="mode-toggle">
                                     <input type="radio" name="alloc_mode" id="mode_auto" value="auto" checked>
-                                    <label for="mode_auto">自动推荐</label>
+                                    <label for="mode_auto" data-tooltip="AI 自动从 TOP10 中选取前 5 位匹配度最高的达人，并按匹配分权重分配预算">自动推荐</label>
                                     <input type="radio" name="alloc_mode" id="mode_num" value="num">
-                                    <label for="mode_num">按人数</label>
+                                    <label for="mode_num" data-tooltip="指定合作人数 N，从 TOP10 中选取前 N 位达人，按匹配分权重分配预算">按人数</label>
                                     <input type="radio" name="alloc_mode" id="mode_roi" value="roi">
-                                    <label for="mode_roi">按ROI</label>
+                                    <label for="mode_roi" data-tooltip="指定期望 ROI（如 1:3 填 3），筛选预估转化率≥该值的达人，按报价升序在预算内优先选性价比高的">按ROI</label>
                                 </div>
                                 <div class="budget-row">
                                     <div class="form-field">

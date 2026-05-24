@@ -3,17 +3,19 @@ Flask Backend API for KOL Matcher
 """
 import json
 import os
+import shutil
 import sys
 from datetime import datetime
 from pathlib import Path
 
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, Response, jsonify, request, send_from_directory
 from flask_cors import CORS
 
 # 将 src 加入路径
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from budget_allocator import BudgetAllocator
+from config import backup_current, get_data_info, get_data_path, set_data_path
 from csv_loader import CSVLoader
 from llm_client import LLMClient
 from pipeline import KOLPipeline
@@ -67,10 +69,19 @@ def recommend():
         data = request.get_json() or {}
 
         # 每次请求创建新实例，避免并发状态冲突
-        pipeline = KOLPipeline(csv_path="../data/influencers.csv", use_llm=True)
+        pipeline = KOLPipeline(use_llm=True)
 
         # 运行 Pipeline
         report = pipeline.run(data)
+
+        # 检查是否有推荐结果
+        if pipeline.top10 is None or pipeline.top10.empty:
+            return jsonify({
+                "success": False,
+                "error": "未找到符合条件的达人，请放宽筛选条件（如扩大预算范围、降低互动率要求、增加投放平台等）",
+                "top10": [],
+                "budget_allocation": {},
+            }), 200
 
         # 预算分配
         total_budget = data.get("total_budget", 15000)
@@ -135,7 +146,7 @@ def get_kols():
     获取全部达人列表（用于达人库页面，不触发 LLM）
     """
     try:
-        loader = CSVLoader("../data/influencers.csv")
+        loader = CSVLoader(str(get_data_path()))
         df = loader.load()
         ok, errs = loader.validate(df)
         if not ok:
@@ -171,7 +182,7 @@ def get_kol(kol_id):
     获取单个达人详情（含综合评分）
     """
     try:
-        loader = CSVLoader("../data/influencers.csv")
+        loader = CSVLoader(str(get_data_path()))
         df = loader.load()
         kol = df[df["kol_id"] == kol_id]
 
@@ -210,7 +221,7 @@ def get_kol_comparison(kol_id):
     获取达人同平台对比数据（百分位、优势劣势、类似博主）
     """
     try:
-        loader = CSVLoader("../data/influencers.csv")
+        loader = CSVLoader(str(get_data_path()))
         df = loader.load()
         kol = df[df["kol_id"] == kol_id]
 
@@ -455,7 +466,7 @@ def get_platforms():
 def get_fields():
     """获取内容领域列表"""
     try:
-        loader = CSVLoader("../data/influencers.csv")
+        loader = CSVLoader(str(get_data_path()))
         df = loader.load()
         fields = set()
         for f in df["field"]:
@@ -540,7 +551,6 @@ def allocate_budget():
 # ========== Settings Management ==========
 
 ENV_FILE = Path(__file__).parent.parent / ".env"
-DATA_CSV = Path(__file__).parent.parent / "data" / "influencers.csv"
 
 
 def _read_env():
@@ -574,18 +584,17 @@ def _mask_key(key):
 
 @app.route("/api/settings", methods=["GET"])
 def get_settings():
-    """获取当前配置（API Key 脱敏）"""
+    """获取当前配置（API Key 脱敏 + 数据文件信息）"""
     try:
         cfg = _read_env()
-
-        # 尝试获取数据量
-        data_count = 0
+        info = get_data_info()
+        root = Path(__file__).parent.parent
+        dp = get_data_path()
         try:
-            loader = CSVLoader("../data/influencers.csv")
-            df = loader.load()
-            data_count = len(df)
-        except Exception:
-            pass
+            rel = dp.relative_to(root)
+            data_path = str(rel).replace("\\", "/")
+        except ValueError:
+            data_path = str(dp).replace("\\", "/")
 
         return jsonify({
             "success": True,
@@ -594,8 +603,10 @@ def get_settings():
                 "base_url": cfg.get("LLM_BASE_URL", "https://api.deepseek.com/v1"),
                 "model": cfg.get("LLM_MODEL", "deepseek-chat"),
                 "timeout": int(cfg.get("LLM_TIMEOUT", "60")),
-                "data_path": "data/influencers.csv",
-                "data_count": data_count,
+                "data_path": data_path,
+                "data_count": info["record_count"],
+                "data_last_modified": info["last_modified"],
+                "data_file_name": info["file_name"],
             }
         })
     except Exception as e:
@@ -712,7 +723,7 @@ def test_connection():
 def reload_data():
     """重新加载并验证 CSV 数据"""
     try:
-        loader = CSVLoader("../data/influencers.csv")
+        loader = CSVLoader(str(get_data_path()))
         df = loader.load()
         ok, errs = loader.validate(df)
 
@@ -732,6 +743,87 @@ def reload_data():
 
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/api/upload_csv", methods=["POST"])
+def upload_csv():
+    """
+    Upload a new CSV to replace the current influencer database.
+    Validates the CSV before replacing, backups the old file.
+    """
+    if "file" not in request.files:
+        return jsonify({"success": False, "error": "未上传文件"}), 400
+
+    file = request.files["file"]
+    if file.filename == "":
+        return jsonify({"success": False, "error": "文件名为空"}), 400
+
+    if not file.filename.endswith(".csv"):
+        return jsonify({"success": False, "error": "仅支持 .csv 格式"}), 400
+
+    import tempfile
+
+    target_path = get_data_path()
+    target_path.parent.mkdir(parents=True, exist_ok=True)
+
+    # Save to a temporary file in the same directory (avoids cross-disk move on Windows)
+    temp_path = target_path.parent / f".{file.filename}.tmp"
+    file.save(temp_path)
+
+    # Validate
+    loader = CSVLoader(str(temp_path))
+    try:
+        df = loader.load()
+        ok, errs = loader.validate(df)
+        if not ok:
+            temp_path.unlink(missing_ok=True)
+            return jsonify({"success": False, "error": "数据验证失败", "detail": errs}), 400
+    except Exception as e:
+        temp_path.unlink(missing_ok=True)
+        return jsonify({"success": False, "error": f"CSV 解析失败: {str(e)}"}), 400
+
+    # Validation passed: backup old file
+    backup_path = backup_current()
+
+    # Replace target file: copy then delete temp (safer on Windows)
+    import stat
+    if target_path.exists():
+        os.chmod(target_path, stat.S_IWRITE)
+    shutil.copy2(str(temp_path), str(target_path))
+    temp_path.unlink(missing_ok=True)
+
+    return jsonify({
+        "success": True,
+        "message": f"上传成功，已加载 {len(df)} 位达人",
+        "record_count": len(df),
+        "backup_path": str(backup_path.relative_to(Path(__file__).parent.parent)).replace("\\", "/") if backup_path else None,
+    })
+
+
+@app.route("/api/download_template", methods=["GET"])
+def download_template():
+    """Download a CSV template with correct headers and one example row."""
+    import csv
+    import io
+
+    from csv_loader import CSVLoader
+
+    headers = CSVLoader.REQUIRED_COLUMNS
+    example = [
+        "KOL_001", "示例达人", "小红书", "50000", "校园/职场", "1200",
+        "1800", "120", "3.8", "3.5", "大学生、应届生、18-25岁", "15", "无风险",
+    ]
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(headers)
+    writer.writerow(example)
+
+    return Response(
+        output.getvalue(),
+        mimetype="text/csv",
+        headers={"Content-Disposition": "attachment; filename=kol_template.csv"},
+    )
 
 
 if __name__ == "__main__":
