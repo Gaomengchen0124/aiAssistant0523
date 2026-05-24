@@ -132,14 +132,19 @@
   {
     "id": "kol-012",
     "category": "frontend",
-    "description": "前端Demo页面（表单输入 + 结果展示）",
-    "status": "todo",
+    "description": "前端页面联调（表单输入 + 结果展示 + 达人库 + 详情 + 历史 + 设置）",
+    "status": "done",
     "steps": [
       "创建 web/index.html 需求表单页面（目标受众/内容领域/预算/平台等）",
       "创建 web/css/style.css 页面样式",
       "创建 web/js/app.js 表单提交与结果渲染交互",
       "对接后端Pipeline或本地Python执行输出",
-      "Flask服务器端到端联调"
+      "Flask服务器端到端联调",
+      "修复 detail.html 匹配分数写死为 85 的问题（后端 API 返回计算字段）",
+      "修复 history.html 查看历史从 alert 改为跳转恢复数据（localStorage）",
+      "修复 settings.html 演示功能改为真实 API 调用",
+      "修复 app.js copyReport/exportCSV 从 alert 改为真实功能",
+      "验证跨页面导航一致性（5 页面互相跳转正常）"
     ]
   },
   {

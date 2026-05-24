@@ -214,6 +214,8 @@ document.getElementById('demandForm').addEventListener('submit', async function(
         target_roi: allocMode === 'roi' && targetRoi ? parseFloat(targetRoi) : undefined,
         engagement_rate_min: document.getElementById('engagement_rate_min').value || undefined,
         conversion_rate_min: document.getElementById('conversion_rate_min').value || undefined,
+        followers_min: document.getElementById('followers_min').value || undefined,
+        followers_max: document.getElementById('followers_max').value || undefined,
         risk_preference: document.getElementById('risk_preference').value,
     };
 
@@ -284,6 +286,7 @@ document.getElementById('demandForm').addEventListener('submit', async function(
 
 function renderResult(result, demand) {
     const top10 = result.top10 || [];
+    window._lastTop10 = top10;  // 保存供复制/导出使用
     const budgetAlloc = result.budget_allocation || {};
     const platformSummary = result.platform_summary || {};
 
@@ -494,11 +497,40 @@ function renderPlatformBar(platformSummary) {
 }
 
 function copyReport() {
-    alert('报告已复制到剪贴板（演示）');
+    const top10 = window._lastTop10 || [];
+    if (top10.length === 0) {
+        alert('暂无推荐数据可复制');
+        return;
+    }
+    const lines = ['排名,达人名称,平台,粉丝数,报价,匹配分,预估ROI,风险'];
+    top10.forEach((kol, idx) => {
+        lines.push(`${idx + 1},${kol.kol_name},${kol.platform},${kol.followers},${kol.price},${kol.total_score},${kol.roi || '-'},${kol.risk_level || '低'}`);
+    });
+    navigator.clipboard.writeText(lines.join('\n')).then(() => {
+        showToast('报告已复制到剪贴板');
+    }).catch(() => {
+        alert('复制失败，请手动复制');
+    });
 }
 
 function exportCSV() {
-    alert('CSV 导出功能（演示）');
+    const top10 = window._lastTop10 || [];
+    if (top10.length === 0) {
+        alert('暂无推荐数据可导出');
+        return;
+    }
+    const lines = ['﻿排名,达人名称,平台,粉丝数,报价,匹配分,预估ROI,风险'];
+    top10.forEach((kol, idx) => {
+        lines.push(`${idx + 1},${kol.kol_name},${kol.platform},${kol.followers},${kol.price},${kol.total_score},${kol.roi || '-'},${kol.risk_level || '低'}`);
+    });
+    const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `KOL推荐_${new Date().toLocaleDateString()}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('CSV 已导出');
 }
 
 window.addEventListener('resize', () => {
@@ -506,4 +538,29 @@ window.addEventListener('resize', () => {
         const chart = echarts.getInstanceByDom(dom);
         if (chart) chart.resize();
     });
+});
+
+// ========== Restore from History ==========
+document.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('mode') === 'history') {
+        const historyData = localStorage.getItem('kol_history_view');
+        if (historyData) {
+            try {
+                const entry = JSON.parse(historyData);
+                const result = {
+                    top10: entry.top10 || [],
+                    report: '',
+                    budget_allocation: entry.budget_allocation || null,
+                    platform_summary: entry.budget_allocation?.platform_summary || {},
+                };
+                renderResult(result, entry.demand || {});
+                localStorage.removeItem('kol_history_view');
+                // 移除 URL 参数
+                history.replaceState(null, '', location.pathname);
+            } catch (e) {
+                console.error('恢复历史记录失败:', e);
+            }
+        }
+    }
 });

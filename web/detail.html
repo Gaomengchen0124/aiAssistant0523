@@ -42,6 +42,287 @@
     <script>
         const API_BASE = 'http://127.0.0.1:5000';
 
+        // 风险评估精确映射
+        function getRiskInfo(riskNote) {
+            const note = String(riskNote || '');
+            if (note.includes('广告比例较高')) {
+                return { class: 'high', text: '广告比例较高' };
+            } else if (note.includes('数据真实')) {
+                return { class: 'low', text: '数据真实' };
+            } else if (note.includes('无风险')) {
+                return { class: 'low', text: '无风险' };
+            } else if (note.includes('粉丝质量存疑')) {
+                return { class: 'medium', text: '粉丝质量存疑' };
+            } else if (note.includes('需谨慎')) {
+                return { class: 'medium', text: '需谨慎' };
+            } else if (note.includes('有争议')) {
+                return { class: 'medium', text: '有争议' };
+            } else if (note.includes('数据异常')) {
+                return { class: 'high', text: '数据异常' };
+            }
+            return { class: 'low', text: note || '无风险' };
+        }
+
+        // 粉丝数格式化
+        function formatFollowers(n) {
+            if (n >= 10000) return (n / 10000).toFixed(0) + '万';
+            return n.toLocaleString();
+        }
+
+        // 获取百分位进度条颜色
+        function getPercentileColorClass(p) {
+            if (p >= 75) return 'percentile-high';
+            if (p >= 50) return 'percentile-mid-high';
+            if (p >= 25) return 'percentile-mid-low';
+            return 'percentile-low';
+        }
+
+        // 渲染雷达图
+        function renderRadarChart(radarData) {
+            const chartDom = document.getElementById('radarChart');
+            if (!chartDom || !radarData) return;
+            const chart = echarts.init(chartDom);
+            chart.setOption({
+                tooltip: { trigger: 'item' },
+                legend: {
+                    data: ['该博主', '同平台平均'],
+                    bottom: 0,
+                    textStyle: { fontSize: 12, color: '#666' }
+                },
+                radar: {
+                    indicator: radarData.indicators,
+                    radius: '65%',
+                    axisName: { color: '#666', fontSize: 11 },
+                    splitArea: {
+                        areaStyle: {
+                            color: ['rgba(102, 126, 234, 0.02)', 'rgba(102, 126, 234, 0.06)', 'rgba(102, 126, 234, 0.02)', 'rgba(102, 126, 234, 0.06)']
+                        }
+                    },
+                    axisLine: { lineStyle: { color: '#e0e4ff' } },
+                    splitLine: { lineStyle: { color: '#e0e4ff' } }
+                },
+                series: [{
+                    type: 'radar',
+                    data: [
+                        {
+                            value: radarData.current,
+                            name: '该博主',
+                            areaStyle: { color: 'rgba(102, 126, 234, 0.2)' },
+                            lineStyle: { color: '#667eea', width: 2 },
+                            itemStyle: { color: '#667eea' },
+                            symbol: 'circle',
+                            symbolSize: 6
+                        },
+                        {
+                            value: radarData.average,
+                            name: '同平台平均',
+                            areaStyle: { color: 'rgba(153, 153, 153, 0.1)' },
+                            lineStyle: { color: '#999', width: 1.5, type: 'dashed' },
+                            itemStyle: { color: '#999' },
+                            symbol: 'circle',
+                            symbolSize: 4
+                        }
+                    ]
+                }]
+            });
+        }
+
+        // 渲染散点图
+        function renderScatterChart(scatterData, currentKolName) {
+            const chartDom = document.getElementById('scatterChart');
+            if (!chartDom || !scatterData) return;
+            const chart = echarts.init(chartDom);
+
+            const currentPoint = scatterData.find(d => d.is_current);
+            const otherPoints = scatterData.filter(d => !d.is_current);
+
+            // 计算气泡大小范围
+            const maxFollowers = Math.max(...scatterData.map(d => d.followers));
+            const minFollowers = Math.min(...scatterData.map(d => d.followers));
+
+            chart.setOption({
+                tooltip: {
+                    trigger: 'item',
+                    formatter: function(params) {
+                        if (params.seriesName === 'current') {
+                            return `<b>${currentKolName}（当前）</b><br/>互动率: ${params.data[0]}%<br/>转化率: ${params.data[1]}%<br/>粉丝: ${formatFollowers(params.data[2])}`;
+                        }
+                        const d = params.data[3];
+                        return `<b>${d.kol_name}</b><br/>互动率: ${d.engagement_rate}%<br/>转化率: ${d.conversion_rate}%<br/>粉丝: ${formatFollowers(d.followers)}`;
+                    }
+                },
+                grid: { left: '12%', right: '8%', top: '10%', bottom: '15%' },
+                xAxis: {
+                    name: '互动率%',
+                    nameLocation: 'middle',
+                    nameGap: 22,
+                    type: 'value',
+                    splitLine: { lineStyle: { color: '#f0f0f0' } },
+                    axisLine: { lineStyle: { color: '#ddd' } },
+                    axisLabel: { color: '#999', fontSize: 11 }
+                },
+                yAxis: {
+                    name: '转化率%',
+                    nameLocation: 'middle',
+                    nameGap: 30,
+                    type: 'value',
+                    splitLine: { lineStyle: { color: '#f0f0f0' } },
+                    axisLine: { lineStyle: { color: '#ddd' } },
+                    axisLabel: { color: '#999', fontSize: 11 }
+                },
+                series: [
+                    {
+                        name: 'others',
+                        type: 'scatter',
+                        data: otherPoints.map(d => [d.engagement_rate, d.conversion_rate, d.followers, d]),
+                        symbolSize: function(data) {
+                            const size = 8 + (data[2] - minFollowers) / (maxFollowers - minFollowers) * 18;
+                            return Math.max(6, Math.min(26, size));
+                        },
+                        itemStyle: { color: 'rgba(153, 153, 153, 0.4)' }
+                    },
+                    {
+                        name: 'current',
+                        type: 'scatter',
+                        data: currentPoint ? [[currentPoint.engagement_rate, currentPoint.conversion_rate, currentPoint.followers]] : [],
+                        symbolSize: function(data) {
+                            const size = 14 + (data[2] - minFollowers) / (maxFollowers - minFollowers) * 20;
+                            return Math.max(12, Math.min(34, size));
+                        },
+                        itemStyle: { color: '#667eea', shadowBlur: 10, shadowColor: 'rgba(102, 126, 234, 0.4)' },
+                        label: {
+                            show: true,
+                            formatter: '● 当前',
+                            position: 'top',
+                            color: '#667eea',
+                            fontSize: 11,
+                            fontWeight: 'bold'
+                        }
+                    }
+                ]
+            });
+        }
+
+        // 渲染横向对比条形图（使用标准化值0-100，tooltip显示原始值）
+        function renderBarChart(barData) {
+            const chartDom = document.getElementById('barChart');
+            if (!chartDom || !barData) return;
+            const chart = echarts.init(chartDom);
+
+            const metrics = barData.map(d => d.metric);
+            const currentValues = barData.map(d => d.current_norm);
+            const averageValues = barData.map(d => d.average_norm);
+
+            chart.setOption({
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: { type: 'shadow' },
+                    formatter: function(params) {
+                        let result = `<b>${params[0].name}</b><br/>`;
+                        params.forEach(p => {
+                            const item = barData.find(d => d.metric === p.name);
+                            const fmt = p.seriesName === '该博主' ? item.current_fmt : item.average_fmt;
+                            result += `${p.marker} ${p.seriesName}: ${fmt}<br/>`;
+                        });
+                        return result;
+                    }
+                },
+                legend: {
+                    data: ['该博主', '同平台平均'],
+                    top: 0,
+                    right: 0,
+                    textStyle: { fontSize: 12, color: '#666' }
+                },
+                grid: { left: '3%', right: '4%', bottom: '3%', top: '12%', containLabel: true },
+                xAxis: {
+                    type: 'value',
+                    splitLine: { lineStyle: { color: '#f0f0f0' } },
+                    axisLine: { show: false },
+                    axisLabel: { color: '#999', fontSize: 11 }
+                },
+                yAxis: {
+                    type: 'category',
+                    data: metrics,
+                    axisLine: { show: false },
+                    axisTick: { show: false },
+                    axisLabel: { color: '#666', fontSize: 12 }
+                },
+                series: [
+                    {
+                        name: '该博主',
+                        type: 'bar',
+                        data: currentValues,
+                        barWidth: 12,
+                        itemStyle: {
+                            color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+                                { offset: 0, color: '#667eea' },
+                                { offset: 1, color: '#764ba2' }
+                            ]),
+                            borderRadius: [0, 6, 6, 0]
+                        }
+                    },
+                    {
+                        name: '同平台平均',
+                        type: 'bar',
+                        data: averageValues,
+                        barWidth: 12,
+                        itemStyle: {
+                            color: '#e0e0e0',
+                            borderRadius: [0, 6, 6, 0]
+                        }
+                    }
+                ]
+            });
+        }
+
+        // 渲染评分环形图
+        function renderScoreRing(totalScore, matchScore, valueScore, riskScore) {
+            const chartDom = document.getElementById('matchRing');
+            if (!chartDom) return;
+            const chart = echarts.init(chartDom);
+            chart.setOption({
+                series: [{
+                    type: 'gauge',
+                    startAngle: 90,
+                    endAngle: -270,
+                    pointer: { show: false },
+                    progress: { show: true, overlap: false, roundCap: true, clip: false, itemStyle: { color: '#667eea' } },
+                    axisLine: { lineStyle: { width: 20, color: [[1, '#e0e4ff']] } },
+                    axisTick: { show: false },
+                    splitLine: { show: false },
+                    axisLabel: { show: false },
+                    data: [{
+                        value: totalScore,
+                        name: '综合评分',
+                        title: { offsetCenter: ['0%', '30%'], fontSize: 13, color: '#999' },
+                        detail: { offsetCenter: ['0%', '0%'], fontSize: 36, fontWeight: 'bold', color: '#667eea', formatter: '{value}', borderWidth: 0 }
+                    }]
+                }]
+            });
+
+            // 渲染分数组成小进度条
+            const breakdownEl = document.getElementById('scoreBreakdown');
+            if (breakdownEl) {
+                breakdownEl.innerHTML = `
+                    <div class="score-breakdown-row">
+                        <span class="score-breakdown-label">受众匹配</span>
+                        <div class="score-breakdown-bar"><div class="score-breakdown-fill" style="width: ${matchScore}%; background: linear-gradient(90deg, #52c41a, #73d13d);"></div></div>
+                        <span class="score-breakdown-value">${matchScore}</span>
+                    </div>
+                    <div class="score-breakdown-row">
+                        <span class="score-breakdown-label">性价比</span>
+                        <div class="score-breakdown-bar"><div class="score-breakdown-fill" style="width: ${valueScore}%; background: linear-gradient(90deg, #667eea, #764ba2);"></div></div>
+                        <span class="score-breakdown-value">${valueScore}</span>
+                    </div>
+                    <div class="score-breakdown-row">
+                        <span class="score-breakdown-label">风险控制</span>
+                        <div class="score-breakdown-bar"><div class="score-breakdown-fill" style="width: ${riskScore}%; background: linear-gradient(90deg, #faad14, #ffc53d);"></div></div>
+                        <span class="score-breakdown-value">${riskScore}</span>
+                    </div>
+                `;
+            }
+        }
+
         async function loadDetail() {
             const params = new URLSearchParams(location.search);
             const kolId = params.get('id');
@@ -53,19 +334,155 @@
             }
 
             try {
-                const response = await fetch(`${API_BASE}/api/kol/${kolId}`);
-                const result = await response.json();
+                // 并行加载基础数据和对比数据
+                const [kolResp, compResp] = await Promise.all([
+                    fetch(`${API_BASE}/api/kol/${kolId}`),
+                    fetch(`${API_BASE}/api/kol/${kolId}/comparison`)
+                ]);
 
-                if (!result.success) {
-                    container.innerHTML = `<div class="empty-state" style="color: #e74c3c;"><h3>加载失败</h3><p>${result.error}</p></div>`;
+                const kolResult = await kolResp.json();
+                const compResult = await compResp.json();
+
+                if (!kolResult.success) {
+                    container.innerHTML = `<div class="empty-state" style="color: #e74c3c;"><h3>加载失败</h3><p>${kolResult.error}</p></div>`;
                     return;
                 }
 
-                const kol = result.data;
+                const kol = kolResult.data;
+                const comp = compResult.success ? compResult.data : null;
+
                 const platformClass = { '小红书': 'xhs', '抖音': 'dy', 'B站': 'bz', '微博': 'wb' }[kol.platform] || '';
-                const followers = kol.followers >= 10000 ? (kol.followers / 10000).toFixed(0) + '万' : kol.followers;
-                const riskClass = kol.risk_note?.includes('广告') ? 'high' : (kol.risk_note?.includes('需') ? 'medium' : 'low');
-                const riskText = kol.risk_note?.includes('广告') ? '广告比例较高' : (kol.risk_note?.includes('需') ? '需谨慎' : '无风险');
+                const followers = formatFollowers(kol.followers);
+                const riskInfo = getRiskInfo(kol.risk_note);
+
+                // 构建对比区域 HTML
+                let comparisonHTML = '';
+                let chartScripts = '';
+                if (comp) {
+                    const metrics = [
+                        { key: 'followers', label: '粉丝数', value: formatFollowers(kol.followers) },
+                        { key: 'engagement_rate', label: '互动率', value: kol.engagement_rate + '%' },
+                        { key: 'conversion_rate', label: '转化率', value: kol.conversion_rate + '%' },
+                        { key: 'value_score', label: '性价比', value: Math.round(kol.value_score || 0) + '分' },
+                    ];
+
+                    // ========== 图表行：雷达图 + 散点图 ==========
+                    comparisonHTML += `
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+                            <div class="card">
+                                <h4>能力画像</h4>
+                                <div id="radarChart" style="width: 100%; height: 280px;"></div>
+                            </div>
+                            <div class="card">
+                                <h4>同平台分布</h4>
+                                <div id="scatterChart" style="width: 100%; height: 280px;"></div>
+                            </div>
+                        </div>
+                    `;
+
+                    // ========== 横向对比条形图 ==========
+                    comparisonHTML += `
+                        <div class="card" style="margin-bottom: 24px;">
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                <h4>同平台对比</h4>
+                                <span style="font-size: 0.8rem; color: #999;">对比范围：${comp.comparison_scope}</span>
+                            </div>
+                            <div id="barChart" style="width: 100%; height: 220px;"></div>
+                        </div>
+                    `;
+
+                    // 百分位卡片
+                    comparisonHTML += `
+                        <div class="card" style="margin-bottom: 24px;">
+                            <div class="comparison-grid">
+                                ${metrics.map(m => {
+                                    const p = comp.percentiles[m.key];
+                                    const colorClass = getPercentileColorClass(p);
+                                    return `
+                                        <div class="comparison-card">
+                                            <div class="comparison-header">
+                                                <span class="comparison-title">${m.label}</span>
+                                                <span class="comparison-value">${m.value}</span>
+                                            </div>
+                                            <div class="percentile-bar ${colorClass}">
+                                                <div class="percentile-fill" style="width: ${p}%;"></div>
+                                            </div>
+                                            <div class="percentile-text">超过同平台 ${p}% 的博主</div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    `;
+
+                    // 优势劣势 HTML
+                    const hasPros = comp.advantages && comp.advantages.length > 0;
+                    const hasCons = comp.disadvantages && comp.disadvantages.length > 0;
+
+                    if (hasPros || hasCons) {
+                        const gridCols = (hasPros && hasCons) ? '1fr 1fr' : '1fr';
+                        comparisonHTML += `
+                            <div style="display: grid; grid-template-columns: ${gridCols}; gap: 24px; margin-bottom: 24px;">
+                                ${hasPros ? `
+                                    <div class="pros-card">
+                                        <div class="pros-cons-header">
+                                            <span class="pros-cons-icon">✅</span>
+                                            <span class="pros-cons-title">优势</span>
+                                        </div>
+                                        <div class="pros-cons-list">
+                                            ${comp.advantages.map(a => `
+                                                <div class="pros-cons-item">
+                                                    <span class="pros-cons-metric">${a.metric}</span>
+                                                    <span class="pros-cons-detail">${a.value} · 超过 ${a.percentile}%</span>
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                    </div>
+                                ` : ''}
+                                ${hasCons ? `
+                                    <div class="cons-card">
+                                        <div class="pros-cons-header">
+                                            <span class="pros-cons-icon">⚠️</span>
+                                            <span class="pros-cons-title">劣势</span>
+                                        </div>
+                                        <div class="pros-cons-list">
+                                            ${comp.disadvantages.map(d => `
+                                                <div class="pros-cons-item">
+                                                    <span class="pros-cons-metric">${d.metric}</span>
+                                                    <span class="pros-cons-detail">${d.value} · 仅超 ${d.percentile}%</span>
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `;
+                    }
+
+                    // 类似博主 HTML
+                    if (comp.similar_kols && comp.similar_kols.length > 0) {
+                        const simPlatformClass = { '小红书': 'xhs', '抖音': 'dy', 'B站': 'bz', '微博': 'wb' };
+                        comparisonHTML += `
+                            <div class="card" style="margin-bottom: 24px;">
+                                <h4 style="margin-bottom: 16px;">类似博主</h4>
+                                <div class="similar-kols-row">
+                                    ${comp.similar_kols.map(s => `
+                                        <div class="similar-kol-card" onclick="location.href='detail.html?id=${s.kol_id}'">
+                                            <div class="similar-kol-avatar">${s.kol_name.charAt(0)}</div>
+                                            <div class="similar-kol-name">${s.kol_name}</div>
+                                            <span class="similar-kol-platform platform-badge ${simPlatformClass[s.platform] || ''}">${s.platform}</span>
+                                            <div class="similar-kol-metrics">
+                                                <span>${formatFollowers(s.followers)}粉</span>
+                                                <span>·</span>
+                                                <span>${s.engagement_rate}%互动</span>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
 
                 container.innerHTML = `
                     <div class="kol-header">
@@ -76,10 +493,14 @@
                         </div>
                     </div>
 
-                    <div class="kol-stats-grid">
+                    <div class="kol-stats-grid" style="grid-template-columns: repeat(4, 1fr);">
                         <div class="kol-stat-card">
                             <div class="kol-stat-value">${followers}</div>
                             <div class="kol-stat-label">粉丝数</div>
+                        </div>
+                        <div class="kol-stat-card">
+                            <div class="kol-stat-value">${kol.avg_likes.toLocaleString()}</div>
+                            <div class="kol-stat-label">平均点赞</div>
                         </div>
                         <div class="kol-stat-card">
                             <div class="kol-stat-value">${kol.engagement_rate}%</div>
@@ -93,8 +514,9 @@
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
                         <div class="card">
-                            <h4>匹配分数</h4>
+                            <h4>综合评分</h4>
                             <div id="matchRing" style="width: 100%; height: 200px;"></div>
+                            <div id="scoreBreakdown" style="margin-top: 16px;"></div>
                         </div>
                         <div class="card">
                             <h4>报价信息</h4>
@@ -108,7 +530,7 @@
                                     <div style="font-size: 0.8rem; color: #999;">历史合作</div>
                                 </div>
                                 <div style="text-align: center; padding: 12px; background: #f8f9fa; border-radius: 8px;">
-                                    <div style="font-weight: 600;"><span class="risk-badge ${riskClass}">${riskText}</span></div>
+                                    <div style="font-weight: 600;"><span class="risk-badge ${riskInfo.class}">${riskInfo.text}</span></div>
                                     <div style="font-size: 0.8rem; color: #999;">风险评估</div>
                                 </div>
                             </div>
@@ -122,27 +544,7 @@
                         </div>
                     </div>
 
-                    <div class="card" style="margin-bottom: 24px;">
-                        <h4>数据表现</h4>
-                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 16px;">
-                            <div style="text-align: center;">
-                                <div style="font-size: 1.5rem; font-weight: 700;">${kol.avg_likes.toLocaleString()}</div>
-                                <div style="font-size: 0.8rem; color: #999;">平均点赞</div>
-                            </div>
-                            <div style="text-align: center;">
-                                <div style="font-size: 1.5rem; font-weight: 700;">${kol.avg_comments.toLocaleString()}</div>
-                                <div style="font-size: 0.8rem; color: #999;">平均评论</div>
-                            </div>
-                            <div style="text-align: center;">
-                                <div style="font-size: 1.5rem; font-weight: 700;">${kol.engagement_rate}%</div>
-                                <div style="font-size: 0.8rem; color: #999;">互动率</div>
-                            </div>
-                            <div style="text-align: center;">
-                                <div style="font-size: 1.5rem; font-weight: 700;">${kol.conversion_rate}%</div>
-                                <div style="font-size: 0.8rem; color: #999;">转化率</div>
-                            </div>
-                        </div>
-                    </div>
+                    ${comparisonHTML}
 
                     <div style="display: flex; gap: 12px;">
                         <button class="btn-secondary" onclick="history.back()">← 返回</button>
@@ -150,31 +552,13 @@
                     </div>
                 `;
 
-                // Render match score ring
+                // Render all charts
                 setTimeout(() => {
-                    const chartDom = document.getElementById('matchRing');
-                    if (chartDom) {
-                        const chart = echarts.init(chartDom);
-                        chart.setOption({
-                            series: [{
-                                type: 'gauge',
-                                startAngle: 90,
-                                endAngle: -270,
-                                pointer: { show: false },
-                                progress: { show: true, overlap: false, roundCap: true, clip: false },
-                                axisLine: { lineStyle: { width: 20, color: [[1, '#e0e4ff']] } },
-                                axisTick: { show: false },
-                                splitLine: { show: false },
-                                axisLabel: { show: false },
-                                data: [{
-                                    value: 85,
-                                    name: '匹配分',
-                                    title: { offsetCenter: ['0%', '30%'], fontSize: 14, color: '#999' },
-                                    detail: { offsetCenter: ['0%', '0%'], fontSize: 36, fontWeight: 'bold', color: '#667eea', formatter: '{value}' }
-                                }],
-                                detail: { width: 50, height: 14, fontSize: 14, color: 'auto', borderColor: 'auto', borderRadius: 20, borderWidth: 1 }
-                            }]
-                        });
+                    renderScoreRing(kol.total_score, kol.match_score, kol.value_score, kol.risk_score);
+                    if (comp) {
+                        renderRadarChart(comp.radar);
+                        renderScatterChart(comp.scatter, kol.kol_name);
+                        renderBarChart(comp.bar_comparison);
                     }
                 }, 100);
 

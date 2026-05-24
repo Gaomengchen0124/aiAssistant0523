@@ -2243,5 +2243,241 @@
         "小红书": 5
       }
     }
+  },
+  {
+    "id": 11,
+    "timestamp": "2026-05-24T10:06:36.807643",
+    "demand": {
+      "target_audience": "不限、18-25岁、大学生",
+      "content_field": "校园",
+      "budget_range": "1000-3000",
+      "platforms": "小红书,抖音",
+      "total_budget": 15000,
+      "engagement_rate_min": "3.0",
+      "risk_preference": "平衡"
+    },
+    "top10": [
+      {
+        "rank": 1,
+        "kol_id": "KOL_016",
+        "kol_name": "大学生省钱攻略",
+        "platform": "小红书",
+        "followers": 68000,
+        "price": 1600,
+        "engagement_rate": 3.8,
+        "conversion_rate": 3.6,
+        "total_score": 94.0,
+        "match_score": 85.0,
+        "roi": "1:2.3",
+        "risk_level": "低",
+        "cooperation_count": 18,
+        "recommend_reason": "强烈推荐「大学生省钱攻略」！该达人专注大学生群体，粉丝画像与目标受众高度重合。68000粉精准覆盖，互动率3.8%、转化率3.6%远超行业均值，且已完成18次合作，经验丰富。1600元报价性价比极高，是高效触达学生市场的优质选择。",
+        "audience": "大学生、学生党"
+      },
+      {
+        "rank": 2,
+        "kol_id": "KOL_006",
+        "kol_name": "大学生活指南",
+        "platform": "小红书",
+        "followers": 75000,
+        "price": 1800,
+        "engagement_rate": 3.9,
+        "conversion_rate": 3.4,
+        "total_score": 88.9,
+        "match_score": 90.0,
+        "roi": "1:1.9",
+        "risk_level": "低",
+        "cooperation_count": 20,
+        "recommend_reason": "推荐理由：该达人粉丝画像与目标受众高度重合，7.5万粉精准覆盖大学生群体，互动率3.9%远超行业均值，转化率3.4%验证了强带货潜力。合作20次经验丰富，1800元报价性价比突出，是低成本高效触达年轻用户的优质选择。",
+        "audience": "大学生、18-22岁"
+      },
+      {
+        "rank": 3,
+        "kol_id": "KOL_001",
+        "kol_name": "校园成长Ada",
+        "platform": "小红书",
+        "followers": 50000,
+        "price": 1200,
+        "engagement_rate": 3.8,
+        "conversion_rate": 3.5,
+        "total_score": 86.8,
+        "match_score": 90.0,
+        "roi": "1:2.9",
+        "risk_level": "高",
+        "cooperation_count": 15,
+        "recommend_reason": "推荐「校园成长Ada」：小红书5万粉精准校园博主，互动率3.8%、转化率3.5%，远超行业均值。15次合作经验稳定可靠，受众年龄与身份高度匹配，仅“不限”范围稍宽，性价比极高（1200元/次），适合校园类产品高效种草。",
+        "audience": "大学生、应届生、18-25岁"
+      },
+      {
+        "rank": 4,
+        "kol_id": "KOL_042",
+        "kol_name": "校园穿搭日记",
+        "platform": "小红书",
+        "followers": 72000,
+        "price": 1750,
+        "engagement_rate": 3.8,
+        "conversion_rate": 3.4,
+        "total_score": 81.8,
+        "match_score": 85.0,
+        "roi": "1:1.9",
+        "risk_level": "低",
+        "cooperation_count": 16,
+        "recommend_reason": "推荐理由：校园穿搭日记（72,000粉）互动率3.8%、转化率3.4%，远超行业均值，16次合作验证稳定产出。受众与品牌高度重合（年龄、身份匹配），仅性别差异可忽略，1750元报价性价比突出，适合精准触达校园人群。",
+        "audience": "大学生、18-24岁女性"
+      },
+      {
+        "rank": 5,
+        "kol_id": "KOL_066",
+        "kol_name": "大学生实习经验",
+        "platform": "小红书",
+        "followers": 63000,
+        "price": 1550,
+        "engagement_rate": 3.7,
+        "conversion_rate": 3.4,
+        "total_score": 76.8,
+        "match_score": 85.0,
+        "roi": "1:2.2",
+        "risk_level": "低",
+        "cooperation_count": 13,
+        "recommend_reason": "推荐理由：这位6.3万粉的实习经验达人，互动率3.7%远超行业均值，转化率高达3.4%，合作13次复购率高。受众精准覆盖大学生群体，年龄匹配度极强，1550元报价性价比突出，是高效触达目标用户的优质选择。",
+        "audience": "大学生、大三大四"
+      },
+      {
+        "rank": 6,
+        "kol_id": "KOL_062",
+        "kol_name": "校园恋爱日记",
+        "platform": "小红书",
+        "followers": 70000,
+        "price": 1700,
+        "engagement_rate": 3.8,
+        "conversion_rate": 3.2,
+        "total_score": 75.7,
+        "match_score": 95.0,
+        "roi": "1:1.9",
+        "risk_level": "高",
+        "cooperation_count": 15,
+        "recommend_reason": "推荐理由：校园恋爱日记（7万粉）互动率3.8%、转化率3.2%，远超行业均值。15次合作验证稳定产出，报价1700元性价比突出。受众与品牌年龄、身份高度重合，精准触达目标人群，是高效种草的不二之选。",
+        "audience": "大学生、18-24岁"
+      },
+      {
+        "rank": 7,
+        "kol_id": "KOL_026",
+        "kol_name": "大学生兼职指南",
+        "platform": "小红书",
+        "followers": 55000,
+        "price": 1300,
+        "engagement_rate": 3.6,
+        "conversion_rate": 3.3,
+        "total_score": 74.7,
+        "match_score": 85.0,
+        "roi": "1:2.5",
+        "risk_level": "低",
+        "cooperation_count": 10,
+        "recommend_reason": "推荐理由：该达人粉丝画像与目标受众高度重合（年龄仅上限高2岁），互动率3.6%远超行业均值，转化率3.3%证明内容带货能力突出。合作10次无差评，性价比极高，1300元即可精准触达大学生群体，适合高转化需求投放。",
+        "audience": "大学生、18-23岁"
+      },
+      {
+        "rank": 8,
+        "kol_id": "KOL_086",
+        "kol_name": "大学生奖学金攻略",
+        "platform": "小红书",
+        "followers": 57000,
+        "price": 1400,
+        "engagement_rate": 3.6,
+        "conversion_rate": 3.3,
+        "total_score": 74.0,
+        "match_score": 95.0,
+        "roi": "1:2.4",
+        "risk_level": "低",
+        "cooperation_count": 10,
+        "recommend_reason": "推荐理由：该达人粉丝精准覆盖大学生群体，年龄与身份高度匹配。5.7万粉量级下，互动率3.6%、转化率3.3%均属优质水平，10次合作经验验证了稳定产出能力。1400元报价性价比突出，适合高效触达目标用户。",
+        "audience": "大学生、18-23岁"
+      },
+      {
+        "rank": 9,
+        "kol_id": "KOL_072",
+        "kol_name": "校园学习方法",
+        "platform": "小红书",
+        "followers": 59000,
+        "price": 1450,
+        "engagement_rate": 3.7,
+        "conversion_rate": 3.3,
+        "total_score": 73.2,
+        "match_score": 85.0,
+        "roi": "1:2.3",
+        "risk_level": "低",
+        "cooperation_count": 11,
+        "recommend_reason": "推荐理由：这位校园学习方法博主拥有5.9万精准学生粉丝，互动率3.7%远超行业均值，转化率高达3.3%，已成功合作11次。受众与目标群体高度匹配，1450元报价性价比突出，是高效触达学生用户的优质选择。",
+        "audience": "大学生、高中生"
+      },
+      {
+        "rank": 10,
+        "kol_id": "KOL_032",
+        "kol_name": "校园美食探店",
+        "platform": "抖音",
+        "followers": 62000,
+        "price": 1550,
+        "engagement_rate": 3.7,
+        "conversion_rate": 3.3,
+        "total_score": 73.2,
+        "match_score": 90.0,
+        "roi": "1:2.1",
+        "risk_level": "低",
+        "cooperation_count": 14,
+        "recommend_reason": "推荐理由：该达人专注校园美食赛道，6.2万粉丝精准触达学生群体，互动率3.7%远超行业均值，转化率3.3%证明内容带货力强。14次合作经验稳定可靠，受众年龄与身份高度匹配，仅需微调内容上限即可高效触达目标用户，1550元报价性价比突出。",
+        "audience": "大学生、18-24岁"
+      }
+    ],
+    "top10_count": 10,
+    "avg_score": 79.9,
+    "budget_allocation": {
+      "allocations": [
+        {
+          "kol_id": "KOL_016",
+          "kol_name": "大学生省钱攻略",
+          "platform": "小红书",
+          "score": 94.0,
+          "allocated": 2634.0,
+          "percentage": 21.9
+        },
+        {
+          "kol_id": "KOL_006",
+          "kol_name": "大学生活指南",
+          "platform": "小红书",
+          "score": 88.9,
+          "allocated": 2491.0,
+          "percentage": 20.8
+        },
+        {
+          "kol_id": "KOL_001",
+          "kol_name": "校园成长Ada",
+          "platform": "小红书",
+          "score": 86.8,
+          "allocated": 2432.0,
+          "percentage": 20.3
+        },
+        {
+          "kol_id": "KOL_042",
+          "kol_name": "校园穿搭日记",
+          "platform": "小红书",
+          "score": 81.8,
+          "allocated": 2291.0,
+          "percentage": 19.1
+        },
+        {
+          "kol_id": "KOL_066",
+          "kol_name": "大学生实习经验",
+          "platform": "小红书",
+          "score": 76.8,
+          "allocated": 2152.0,
+          "percentage": 17.9
+        }
+      ],
+      "reserve": 3000.0,
+      "total": 15000,
+      "platform_summary": {
+        "小红书": 5
+      }
+    }
   }
 ]
