@@ -232,3 +232,57 @@ Open http://127.0.0.1:5000 in your browser
  * Detected change in 'D:\\360安全浏览器下载\\ai_assistant\\aiAssistant0523\\src\\csv_loader.py', reloading
  * Detected change in 'D:\\360安全浏览器下载\\ai_assistant\\aiAssistant0523\\src\\pipeline.py', reloading
  * Detected change in 'D:\\360安全浏览器下载\\ai_assistant\\aiAssistant0523\\web\\app.py', reloading
+==================================================
+KOL Matcher API Server
+==================================================
+Open http://127.0.0.1:5000 in your browser
+==================================================
+ * Restarting with watchdog (windowsapi)
+ * Debugger is active!
+ * Debugger PIN: 646-979-739
+ * Detected change in 'D:\\360安全浏览器下载\\ai_assistant\\aiAssistant0523\\web\\app.py', reloading
+ * Detected change in 'D:\\360安全浏览器下载\\ai_assistant\\aiAssistant0523\\web\\app.py.tmp.88740.978090219683', reloading
+==================================================
+KOL Matcher API Server
+==================================================
+Open http://127.0.0.1:5000 in your browser
+==================================================
+ * Restarting with watchdog (windowsapi)
+ * Debugger is active!
+ * Debugger PIN: 646-979-739
+ * Detected change in 'D:\\360安全浏览器下载\\ai_assistant\\aiAssistant0523\\src\\platform_api\\__init__.py.tmp.88740.d8532040dd74', reloading
+==================================================
+KOL Matcher API Server
+==================================================
+Open http://127.0.0.1:5000 in your browser
+==================================================
+ * Restarting with watchdog (windowsapi)
+ * Debugger is active!
+ * Debugger PIN: 646-979-739
+ * Detected change in 'D:\\360安全浏览器下载\\ai_assistant\\aiAssistant0523\\src\\platform_api\\base.py.tmp.88740.4791100d1364', reloading
+==================================================
+KOL Matcher API Server
+==================================================
+Open http://127.0.0.1:5000 in your browser
+==================================================
+ * Restarting with watchdog (windowsapi)
+ * Debugger is active!
+ * Debugger PIN: 646-979-739
+ * Detected change in 'D:\\360安全浏览器下载\\ai_assistant\\aiAssistant0523\\src\\platform_api\\weibo.py.tmp.88740.2e96142dbeaf', reloading
+==================================================
+KOL Matcher API Server
+==================================================
+Open http://127.0.0.1:5000 in your browser
+==================================================
+ * Restarting with watchdog (windowsapi)
+ * Debugger is active!
+ * Debugger PIN: 646-979-739
+ * Detected change in 'D:\\360安全浏览器下载\\ai_assistant\\aiAssistant0523\\src\\platform_api\\bilibili.py.tmp.88740.fb04760ccf66', reloading
+==================================================
+KOL Matcher API Server
+==================================================
+Open http://127.0.0.1:5000 in your browser
+==================================================
+ * Restarting with watchdog (windowsapi)
+ * Debugger is active!
+ * Debugger PIN: 646-979-739
